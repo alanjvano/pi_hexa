@@ -58,47 +58,56 @@ class hexacopter:
         self.pos_fus_q = [0,0,0]    # fusion position (quaternarion?)
         self.pos_comp = [0,0,0]     # complementary filter pos
         self.comp = [0,0,0]         # compass pos
+        self.last_update = time.monotonic()      # last update time
 
     # update object values with data from IMU
-    def update(self, data):
-        self.gyro_raw = np.degrees(data['gyro'])
-        self.pos_fus = np.degrees(data['fusionPose'])
-        self.pos_fus_q = np.degrees(data['fusionQPose'])
-        self.acc_raw = data['accel']
-        self.comp = np.degrees(data['compass'])
+    def update(self):
+         if imu.IMURead():
+            # read data from IMU
+            data = imu.getIMUData()
+        
+            # convert to degrees
+            self.gyro_raw = np.degrees(data['gyro'])
+            self.pos_fus = np.degrees(data['fusionPose'])
+            self.pos_fus_q = np.degrees(data['fusionQPose'])
+            self.acc_raw = data['accel']
+            self.comp = np.degrees(data['compass'])
+        
+            time.sleep(poll_interval * 1.0/1000.0)
     
     # display hopefully useful info
-    def disp(self):
-        print('gyro    - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(self.gyro_raw),end='\n')
-        print('accel   - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(self.acc_raw),end='\n')
-        print('fusion  - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(self.pos_fus),end='\n')
-        print('fusionq - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(self.pos_fus_q),end='\r\r\r\r')
-        sys.stdout.flush()
+    def disp(self, stdscr):
+        stdscr.erase()
+        stdscr.addstr(1,0,'gyro    - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(self.gyro_raw))
+        stdscr.addstr(2,0,'accel   - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(self.acc_raw))
+        stdscr.addstr(3,0,'fusion  - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(self.pos_fus))
+        stdscr.addstr(4,0,'fusionq - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(self.pos_fus_q))
+        stdscr.refresh()
 
+    def gyro_calibrate(self):
+        # do nothing 
+        test = 1
 
 def main(stdscr):
     # create hexacopter object
     hexa = hexacopter()
 
+    # set terminal output font
+    curses.use_default_colors()
+
     while True:
-        if imu.IMURead():
-            # read data from IMU
-            data = imu.getIMUData()
-            hexa.update(data) 
-
-            time.sleep(poll_interval * 1.0/1000.0)
-        hexa.disp();
-
+        hexa.update()
+        hexa.disp(stdscr)
 
     
-def complementary_filter(gyro_pos, gryo_sensitivity, acc_sensitivity, g_data):
-   gyro_c = copy.copy(gyro_pos)
+def complementary_filter(gyro_raw, acc_raw, gryo_sensitivity, acc_sensitivity, time_init):
+    tmp_pos = [0,0,0]
 
-   # simple integration of gryoscope date
-   gyro_c[0] += (g_data[0] / gyro_sensitivity) * (poll_interval * 0.001)
-   gyro_c[1] += (g_data[1] / gyro_sensitivity) * (poll_interval * 0.001)
-   gyro_c[2] += (g_data[2] / gyro_sensitivity) * (poll_interval * 0.001)
-
+   # gyroscope data returns only change in pos
+   # p = integral(dp/dt)
+   # because this is a discrete case, just sum change times time elapsed
+    for i in range(len(gyro_raw)):
+        tmp_pos += gyro_raw * (time.monotonic - time_init)
 
 
 if __name__ == "__main__":
