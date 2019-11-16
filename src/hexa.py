@@ -12,6 +12,10 @@ import numpy as np
 import curses
 from curses import wrapper
 import warnings
+import evdev
+import threading
+
+
 
 # argument parser
 parser = argparse.ArgumentParser(description="hexa")
@@ -50,6 +54,17 @@ imu.setCompassEnable(True)
 poll_interval = imu.IMUGetPollInterval()
 print("poll interval: %d" % poll_interval)
 
+# set up line pointer for curses interface
+#global curses_line 0
+
+#define input codes for PS3 controller
+ps3_codes = {'l_but':295, 'u_but':292, 'r_but':293, 'd_but':294,
+        'x_but':302, 's_but':303, 't_but':300, 'c_but':301,
+        'l1':298, 'l2':296, 'r1':299, 'r2':297,
+        'start':291, 'sel':288, 
+        'l_joy':289, 'r_joy':290}
+#Note: type 3: analog, type 1: key press
+
 class hexacopter:
     def __init__(self):
         self.gyro_raw = [0,0,0]     # raw gyroscope rates
@@ -76,10 +91,12 @@ class hexacopter:
             self.pos_fus_q = data['fusionQPose']
             self.acc_raw = data['accel']
             self.comp = data['compass']
+            time_cur = data['timestamp']
+            # print((time_cur - self.last_update)*10**6)
 
             # update complementary filter
-            [self.pos_comp, self.last_update] = complementary_filter(self.pos_comp, self.gyro_raw, self.acc_raw,
-                    self.gyro_sensitivity, self.acc_sensitivity, self.last_update, self.gyro_bias)
+            #[self.pos_comp, self.last_update] = complementary_filter(self.pos_comp, self.gyro_raw, self.acc_raw,
+            #        self.gyro_sensitivity, self.acc_sensitivity, self.last_update, time_cur, self.gyro_bias)
         
             time.sleep(poll_interval * 1.0/1000.0)
     
@@ -87,7 +104,7 @@ class hexacopter:
     def disp(self, stdscr):
         stdscr.erase()
         stdscr.addstr(1,0,'gyro    - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(self.gyro_raw)))
-        stdscr.addstr(2,0,'accel   - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(self.acc_raw)))
+        stdscr.addstr(2,0,'accel   - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(self.acc_raw))
         stdscr.addstr(3,0,'fusion  - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(self.pos_fus)))
         stdscr.addstr(4,0,'fusionq - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(self.pos_fus_q)))
         stdscr.addstr(5,0,'complem - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(self.pos_comp)))
@@ -98,11 +115,15 @@ class hexacopter:
         test = 1
 
 def main(stdscr):
+    #set up terminal output
+    curses.use_default_colors()
+    stdscr.scrollok(1) #enable scrolling
+
+    #initialize controller
+    ps3 = init_controller(stdscr)
+
     # create hexacopter object
     hexa = hexacopter()
-
-    # set terminal output font
-    curses.use_default_colors()
 
     while True:
         hexa.update()
@@ -110,14 +131,14 @@ def main(stdscr):
 
     
 def complementary_filter(pos_comp, gyro_raw, acc_raw, 
-                         gyro_sensitivity, acc_sensitivity, time_init, gyro_bias):
+                         gyro_sensitivity, acc_sensitivity, time_init, time_cur, gyro_bias):
     tmp_gyro = [0,0,0]
     tmp_acc = [0,0,0]
 
    # gyroscope data returns only change in pos
    # p = integral(dp/dt)
    # because this is a discrete case, just sum change times time elapsed
-    delta_t = time.monotonic() - time_init
+    delta_t = (time_cur - time_init) * 10**6    # convert from microseconds to seconds
     for i, each in enumerate(tmp_gyro):
         each = (gyro_raw[i] + gyro_bias[i]) * delta_t
    
@@ -129,7 +150,35 @@ def complementary_filter(pos_comp, gyro_raw, acc_raw,
     pos_comp += gyro_sensitivity * np.asarray(tmp_gyro) + acc_sensitivity * np.asarray(tmp_acc)
 
     # return updated position vector and last sample time
-    return pos_comp, time.monotonic()
+    return pos_comp, time_cur
+
+def init_controller(stdscr):
+    stdscr.addstr(1,0,"initializing controller...")
+    stdscr.refresh()
+    conn = False
+    
+    while not conn:
+        devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
+        for device in devices:
+            #print(device.name, device.path)
+            if device.name == 'Sony PLAYSTATION(R)3 Controller':
+                dev = device.path
+                ps3 = evdev.InputDevice(dev)
+                stdscr.addstr(2,0,device.name+' '+device.path)
+                stdscr.addstr(3,0,"found ps3 contoller")
+                stdscr.refresh()
+                conn = True
+
+    #loop until start button is pressed
+    for event in ps3.read_loop():
+        stdscr.addstr(str(event)+'\n')
+        stdscr.refresh()
+        if event.type == 1 and event.code == 315 and event.value == 1:
+            stdscr.erase()
+            stdscr.addstr('starting')
+            stdscr.refresh()
+            time.sleep(1)
+            return ps3
 
 
 if __name__ == "__main__":
