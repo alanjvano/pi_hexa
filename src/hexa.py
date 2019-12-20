@@ -14,23 +14,20 @@ import warnings
 import evdev
 from threading import Thread
 
-
-
 # argument parser
 parser = argparse.ArgumentParser(description="hexa")
 parser.add_argument('-c', '--conf', required=True, help='path to json config file needed')
 args = vars(parser.parse_args())
 print(args)
 
-# deal with warnings and load config 
+# deal with warnings and load config
 warnings.filterwarnings("ignore")
 conf = json.load(open(args["conf"]))
 
-#IMU_REFRESH = 
+#IMU_REFRESH =
 #print("name: " + __name__)
 
 # set up IMU
-
 SETTINGS_FILE = "RTIMUlib"
 print("setings file: " + SETTINGS_FILE + ".ini")
 if not os.path.exists(SETTINGS_FILE + ".ini"):  # if no file, create one
@@ -44,7 +41,7 @@ if (not imu.IMUInit()):
     sys.exit(1)
 else:
     print("successfully initialized IMU")
-    
+
 imu.setSlerpPower(0.02)
 imu.setGyroEnable(True)
 imu.setAccelEnable(True)
@@ -56,13 +53,68 @@ print("poll interval: %d" % poll_interval)
 # set up line pointer for curses interface
 #global curses_line 0
 
+# init global variables
+global control
+
 #define input codes for PS3 controller
 ps3_codes = {'l_but':295, 'u_but':292, 'r_but':293, 'd_but':294,
         'x_but':302, 's_but':303, 't_but':300, 'c_but':301,
         'l1':298, 'l2':296, 'r1':299, 'r2':297,
-        'start':291, 'sel':288, 
+        'start':291, 'sel':288,
         'l_joy':289, 'r_joy':290}
 #Note: type 3: analog, type 1: key press
+
+# class used for interacting with shared memory
+class Spin_lock:
+    def __init__(self, a):
+        self.resource = self.a
+        self.locked = False
+
+    def acquire(self):
+        while (self.locked):
+            pass
+        self.locked = True
+
+    def release(self):
+        self.locked = False
+
+    def set(self, val):
+        self.resource = val
+
+    def get(self):
+        return self.resource
+
+class Controller:
+    def __init__(self, dev):
+        self.device = dev
+        self.x = False
+        self.o = False
+        self.tri = False
+        self.sqr = False
+        self.up = False
+        self.down = False
+        self.left = False
+        self.right = False
+        self.start = False
+        self.select = False
+        self.home = False
+        self.l_bump = False
+        self.r_bump = False
+        self.l_joy = False
+        self.r_joy = False
+        self.left_x = 0.0
+        self.left_y = 0.0
+        self.right_x = 0.0
+        self.right_y = 0.0
+        self.l_trig = 0.0
+        self.r_trig = 0.0
+
+def read_controller(dev):
+    global control
+    for event in dev.read_loop():
+        control.acquire()
+        if event.type == 1 and event.code == 315 and event.value == 1:
+        control.release()
 
 class hexacopter:
     def __init__(self):
@@ -84,7 +136,7 @@ class hexacopter:
          if imu.IMURead():
             # read data from IMU
             data = imu.getIMUData()
-        
+
             self.gyro_raw = data['gyro']
             self.pos_fus = data['fusionPose']
             self.pos_fus_q = data['fusionQPose']
@@ -96,9 +148,9 @@ class hexacopter:
             # update complementary filter
             #[self.pos_comp, self.last_update] = complementary_filter(self.pos_comp, self.gyro_raw, self.acc_raw,
             #        self.gyro_sensitivity, self.acc_sensitivity, self.last_update, time_cur, self.gyro_bias)
-        
+
             time.sleep(poll_interval * 1.0/1000.0)
-    
+
     # display hopefully useful info
     def disp(self, stdscr):
         stdscr.erase()
@@ -110,7 +162,7 @@ class hexacopter:
         stdscr.refresh()
 
     def gyro_calibrate(self):
-        # do nothing 
+        # do nothing
 
         # Goal: Set a bias and a deadband
         # bias = 0.0
@@ -125,7 +177,7 @@ class hexacopter:
         #       min = imu_val
         # bias = bias / 50
         # deadband = max - min
-        
+
         # Checking the deadband
         # if (val < bias + deadband) || (val > bias - deadbabd):
         #   return 0
@@ -135,22 +187,31 @@ class hexacopter:
         test = 1
 
 def main(stdscr):
-    #set up terminal output
+    global control
+
+    # set up terminal output
     curses.use_default_colors()
     stdscr.scrollok(1) #enable scrolling
 
-    #initialize controller
+    # initialize controller
     ps3 = init_controller(stdscr)
 
     # create hexacopter object
     hexa = hexacopter()
 
+    # initialize threads
+    control = Spin_lock(Controller())
+    control_t = Thread(target=read_controller(ps3))
+
+    # start threads
+    control_t.start()
+
     while True:
         hexa.update()
         hexa.disp(stdscr)
 
-    
-def complementary_filter(pos_comp, gyro_raw, acc_raw, 
+
+def complementary_filter(pos_comp, gyro_raw, acc_raw,
                          gyro_sensitivity, acc_sensitivity, time_init, time_cur, gyro_bias):
     tmp_gyro = [0,0,0]
     tmp_acc = [0,0,0]
@@ -161,7 +222,7 @@ def complementary_filter(pos_comp, gyro_raw, acc_raw,
     delta_t = (time_cur - time_init) * 10**6    # convert from microseconds to seconds
     for i, each in enumerate(tmp_gyro):
         each = (gyro_raw[i] + gyro_bias[i]) * delta_t
-   
+
     # based on Freesccale Semiconductor Application Note
     # (www.nxp.com/doc/en/application-note/AN3461.pdf)
     tmp_acc[0] = math.atan(acc_raw[1]/acc_raw[2])
@@ -176,7 +237,7 @@ def init_controller(stdscr):
     stdscr.addstr(1,0,"initializing controller...")
     stdscr.refresh()
     conn = False
-    
+
     while not conn:
         devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
         for device in devices:
