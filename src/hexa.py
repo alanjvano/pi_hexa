@@ -10,10 +10,9 @@ import json
 import argparse
 import numpy as np
 import curses
-from curses import wrapper
 import warnings
 import evdev
-import threading
+from threading import Thread
 
 
 
@@ -112,6 +111,27 @@ class hexacopter:
 
     def gyro_calibrate(self):
         # do nothing 
+
+        # Goal: Set a bias and a deadband
+        # bias = 0.0
+        # min = 0.0
+        # max = 0.0
+        # deadband = 0.0
+        # for i in range (0, 50):
+        #   bias = bias + imu_val
+        #   if imu_val > max:
+        #       max = imu_val
+        #   if imu_val < min:
+        #       min = imu_val
+        # bias = bias / 50
+        # deadband = max - min
+        
+        # Checking the deadband
+        # if (val < bias + deadband) || (val > bias - deadbabd):
+        #   return 0
+        # else:
+        #   return val - bias
+
         test = 1
 
 def main(stdscr):
@@ -182,4 +202,4 @@ def init_controller(stdscr):
 
 
 if __name__ == "__main__":
-    wrapper(main)
+    curses.wrapper(main)
