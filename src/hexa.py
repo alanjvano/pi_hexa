@@ -24,37 +24,12 @@ print(args)
 warnings.filterwarnings("ignore")
 conf = json.load(open(args["conf"]))
 
-#IMU_REFRESH =
-#print("name: " + __name__)
-
-# set up IMU
-SETTINGS_FILE = "RTIMUlib"
-print("setings file: " + SETTINGS_FILE + ".ini")
-if not os.path.exists(SETTINGS_FILE + ".ini"):  # if no file, create one
-    print("file not found, created settings file")
-settings = RTIMU.Settings(SETTINGS_FILE)
-imu = RTIMU.RTIMU(settings) # creating IMU object
-print("IMU Name: " + imu.IMUName())
-
-if (not imu.IMUInit()):
-    print("failed to init IMU")
-    sys.exit(1)
-else:
-    print("successfully initialized IMU")
-
-imu.setSlerpPower(0.02)
-imu.setGyroEnable(True)
-imu.setAccelEnable(True)
-imu.setCompassEnable(True)
-
-poll_interval = imu.IMUGetPollInterval()
-print("poll interval: %d" % poll_interval)
-
 # set up line pointer for curses interface
 #global curses_line 0
 
 # init global variables
 global control
+global imu
 
 #define input codes for PS3 controller
 ps3_codes = {'l_but':295, 'u_but':292, 'r_but':293, 'd_but':294,
@@ -109,12 +84,103 @@ class Controller:
         self.l_trig = 0.0
         self.r_trig = 0.0
 
+class IMU:
+    def __init__(self):
+        self.accel = [0.0,0.0,0.0]
+        self.vel = [0.0,0.0,0.0]
+        self.pos = [0.0,0.0,0.0]
+        self.a_vel = [0.0,0.0,0.0]
+        self.angle = [0.0,0.0,0.0]
+        self.comp = [0.0,0.0,0.0]
+        self.angle_fus = [0.0,0.0,0.0]
+        self.angle_fus_q = [0.0,0.0,0.0]
+        self.time = 0.0
+        self.bias = 0.0
+        self.deadband = 0.0
+        self.calibrated = False
+
+def start_imu():
+    # set up IMU
+    SETTINGS_FILE = "RTIMUlib"
+    print("setings file: " + SETTINGS_FILE + ".ini")
+    if not os.path.exists(SETTINGS_FILE + ".ini"):  # if no file, create one
+        print("file not found, created settings file")
+    settings = RTIMU.Settings(SETTINGS_FILE)
+    imu_dev = RTIMU.RTIMU(settings) # creating IMU object
+    print("IMU Name: " + imu_dev.IMUName())
+
+    if (not imu_dev.IMUInit()):
+        print("failed to init IMU")
+        sys.exit(1)
+    else:
+        print("successfully initialized IMU")
+
+    imu_dev.setSlerpPower(0.02)
+    imu_dev.setGyroEnable(True)
+    imu_dev.setAccelEnable(True)
+    imu_dev.setCompassEnable(True)
+
+    poll_interval = imu_dev.IMUGetPollInterval()
+    print("poll interval: %d" % poll_interval)
+    return imu_dev
+
 def read_controller(dev):
     global control
     for event in dev.read_loop():
         control.acquire()
         if event.type == 1 and event.code == 315 and event.value == 1:
         control.release()
+
+def read_imu(dev):
+    global imu
+    while True:
+        if dev.IMURead():
+           # read data from IMU
+           data = dev.getIMUData()
+
+           imu.acquire()
+           imu.get().a_vel = data['gyro']
+           imu.get().angle_fus = data['fusionPose']
+           imu.get().angle_fus_q = data['fusionQPose']
+           imu.get().accel = data['accel']
+           imu.get().comp = data['compass']
+           imu.get().time = data['timestamp']
+           # print((time_cur - self.last_update)*10**6)
+           imu.release()
+
+           if imu.get().calibrated:
+               # update complementary filter
+               #[self.pos_comp, self.last_update] = complementary_filter(self.pos_comp, self.gyro_raw, self.acc_raw,
+               #        self.gyro_sensitivity, self.acc_sensitivity, self.last_update, time_cur, self.gyro_bias)
+
+           time.sleep(poll_interval * 1.0/1000.0)
+
+def calibrate_imu(dev, num_cal):
+    global imu
+    bias = [0.0, 0.0, 0.0]
+    min = [0.0, 0.0, 0.0]
+    max = [0.0, 0.0, 0.0]
+    for i in range (0, num_cal):
+        imu.acquire()
+        for i, each in enumerate(imu.get().a_vel):
+            bias[i] = bias[i] + each
+            if each > max[i]:
+                max[i] = each
+            elif each < min[i]:
+                min[i] = each
+        imu.release()
+    imu.acquire()
+    imu.get().bias = bias / num_cal
+    imu.get().deadband = max - min
+    imu.get().calibrated = True
+    imu.release()
+
+    # Checking the deadband
+    # if (val < bias + deadband) || (val > bias - deadbabd):
+    #   return 0
+    # else:
+    #   return val - bias
+
 
 class hexacopter:
     def __init__(self):
@@ -131,26 +197,6 @@ class hexacopter:
         # calibrated values
         self.gyro_bias = [0,0,0]
 
-    # update object values with data from IMU
-    def update(self):
-         if imu.IMURead():
-            # read data from IMU
-            data = imu.getIMUData()
-
-            self.gyro_raw = data['gyro']
-            self.pos_fus = data['fusionPose']
-            self.pos_fus_q = data['fusionQPose']
-            self.acc_raw = data['accel']
-            self.comp = data['compass']
-            time_cur = data['timestamp']
-            # print((time_cur - self.last_update)*10**6)
-
-            # update complementary filter
-            #[self.pos_comp, self.last_update] = complementary_filter(self.pos_comp, self.gyro_raw, self.acc_raw,
-            #        self.gyro_sensitivity, self.acc_sensitivity, self.last_update, time_cur, self.gyro_bias)
-
-            time.sleep(poll_interval * 1.0/1000.0)
-
     # display hopefully useful info
     def disp(self, stdscr):
         stdscr.erase()
@@ -162,32 +208,11 @@ class hexacopter:
         stdscr.refresh()
 
     def gyro_calibrate(self):
-        # do nothing
 
-        # Goal: Set a bias and a deadband
-        # bias = 0.0
-        # min = 0.0
-        # max = 0.0
-        # deadband = 0.0
-        # for i in range (0, 50):
-        #   bias = bias + imu_val
-        #   if imu_val > max:
-        #       max = imu_val
-        #   if imu_val < min:
-        #       min = imu_val
-        # bias = bias / 50
-        # deadband = max - min
-
-        # Checking the deadband
-        # if (val < bias + deadband) || (val > bias - deadbabd):
-        #   return 0
-        # else:
-        #   return val - bias
-
-        test = 1
 
 def main(stdscr):
     global control
+    global imu
 
     # set up terminal output
     curses.use_default_colors()
@@ -195,21 +220,19 @@ def main(stdscr):
 
     # initialize controller
     ps3 = init_controller(stdscr)
+    control = Spin_lock(Controller())
 
-    # create hexacopter object
-    hexa = hexacopter()
+    # initialize imu
+    imu_dev = start_imu()
+    imu = Spin_lock(IMU())
 
     # initialize threads
-    control = Spin_lock(Controller())
     control_t = Thread(target=read_controller(ps3))
-
-    # start threads
+    imu_t = Thread(target=read_imu(imu_dev))
     control_t.start()
+    imu_t.start()
 
-    while True:
-        hexa.update()
-        hexa.disp(stdscr)
-
+    calibrate_imu()
 
 def complementary_filter(pos_comp, gyro_raw, acc_raw,
                          gyro_sensitivity, acc_sensitivity, time_init, time_cur, gyro_bias):
