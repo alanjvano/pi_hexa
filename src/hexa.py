@@ -142,6 +142,7 @@ def init_controller(stdscr):
             stdscr.refresh()
             time.sleep(5)
             #if device.name == 'Sony PLAYSTATION(R)3 Controller':
+            # Why did the device change name????????
             if device.name == 'PLAYSTATION(R)3Conteroller-PANHAI':
                 dev = device.path
                 ps3 = evdev.InputDevice(dev)
@@ -220,6 +221,7 @@ def calibrate_imu(num_cal, stdscr):
     deadband = [0.0,0.0,0.0]
     min = [0.0, 0.0, 0.0]
     max = [0.0, 0.0, 0.0]
+    
     for j in range (0, num_cal):
         imu.acquire()
         for i, each in enumerate(imu.get().a_vel):
@@ -229,7 +231,10 @@ def calibrate_imu(num_cal, stdscr):
             elif each < min[i]:
                 min[i] = each
         imu.release()
+
+        # wait for imu readings to update
         time.sleep(2.0 * poll_interval * 1.0/1000.0)
+
     bias[:] = [k / num_cal for k in bias]
     deadband[:] = [(max[m] - min[m]) for m in range(len(min))]
     imu.acquire()
