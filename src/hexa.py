@@ -140,7 +140,6 @@ def init_controller(stdscr):
         for device in devices:
             stdscr.addstr(str(device.name)+str(device.path))
             stdscr.refresh()
-            time.sleep(5)
             #if device.name == 'Sony PLAYSTATION(R)3 Controller':
             if device.name == 'PLAYSTATION(R)3Conteroller-PANHAI':
                 dev = device.path
@@ -253,6 +252,7 @@ def update_scr(stdscr):
     stdscr.addstr(3,0,'fusion  - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_fus)))
     stdscr.addstr(4,0,'fusionq - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_fus_q)))
     stdscr.addstr(5,0,'complem - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_comp)))
+    stdscr.addstr(6,0,'time - {}'.format(imu.get().time_cur))
     imu.release()
     stdscr.refresh()
 
