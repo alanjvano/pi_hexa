@@ -138,8 +138,11 @@ def init_controller(stdscr):
     while not conn:
         devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
         for device in devices:
-            #print(device.name, device.path)
-            if device.name == 'Sony PLAYSTATION(R)3 Controller':
+            stdscr.addstr(str(device.name)+str(device.path))
+            stdscr.refresh()
+            time.sleep(5)
+            #if device.name == 'Sony PLAYSTATION(R)3 Controller':
+            if device.name == 'PLAYSTATION(R)3Conteroller-PANHAI':
                 dev = device.path
                 ps3 = evdev.InputDevice(dev)
                 stdscr.addstr(2,0,device.name+' '+device.path)
