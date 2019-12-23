@@ -211,8 +211,9 @@ def calibrate_imu(num_cal, stdscr):
     global imu
     global poll_interval
     stdscr.addstr('Calibrating IMU: {} measurements\n'.format(num_cal))
-    stdscr.refesh()
+    stdscr.refresh()
     bias = [0.0, 0.0, 0.0]
+    deadband = [0.0,0.0,0.0]
     min = [0.0, 0.0, 0.0]
     max = [0.0, 0.0, 0.0]
     for j in range (0, num_cal):
@@ -225,15 +226,16 @@ def calibrate_imu(num_cal, stdscr):
                 min[i] = each
         imu.release()
         time.sleep(poll_interval * 1.0/1000.0)
-    bias = bias / num_cal
+    bias[:] = [k / num_cal for k in bias] 
+    deadband[:] = [(max[m] - min[m]) for m in range(len(min))]  
     imu.acquire()
     imu.get().bias = bias
-    imu.get().deadband = max - min
+    imu.get().deadband = deadband
     imu.get().calibrated = True
     imu.release()
     stdscr.addstr('Calibration Complete.\n')
-    stdscr.addstr('bias: {}   deadband: {}\n'.format(bias, max-min))
-    stdscr.refesh()
+    stdscr.addstr('bias: {}   deadband: {}\n'.format(bias, deadband))
+    stdscr.refresh()
     time.sleep(2)
 
 # display hopefully useful info
@@ -244,8 +246,8 @@ def update_scr(stdscr):
     imu.acquire()
     stdscr.addstr(1,0,'gyro    - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().a_vel)))
     stdscr.addstr(2,0,'accel   - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(imu.get().accel))
-    stdscr.addstr(3,0,'fusion  - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().pos_fus)))
-    stdscr.addstr(4,0,'fusionq - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().pos_fus_q)))
+    stdscr.addstr(3,0,'fusion  - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_fus)))
+    stdscr.addstr(4,0,'fusionq - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_fus_q)))
     stdscr.addstr(5,0,'complem - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_comp)))
     imu.release()
     stdscr.refresh()
@@ -296,7 +298,7 @@ def main(stdscr):
     control_t.start()
     imu_t.start()
 
-    sleep.time(0.5) # wait for imu to init...
+    time.sleep(0.5) # wait for imu to init...
     calibrate_imu(50, stdscr)
 
     while True:
