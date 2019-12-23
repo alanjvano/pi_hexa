@@ -165,12 +165,14 @@ def read_controller(dev):
         pass    # do nothing for now
         control.release()
 
-def read_imu(dev):
+def read_imu(dev,stdscr):
     global imu
     global poll_interval
     global conf
     size = conf['accel_filter_num']
     accel_hist = np.zeros(size)
+    stdscr.addstr('started imu thread...\n')
+    stdscr.refresh()
     while True:
         if dev.IMURead():
            # read data from IMU
@@ -224,7 +226,7 @@ def calibrate_imu(num_cal, stdscr):
             elif each < min[i]:
                 min[i] = each
         imu.release()
-        time.sleep(poll_interval * 1.0/1000.0)
+        time.sleep(2.0 * poll_interval * 1.0/1000.0)
     bias[:] = [k / num_cal for k in bias]
     deadband[:] = [(max[m] - min[m]) for m in range(len(min))]
     imu.acquire()
@@ -278,6 +280,7 @@ def complementary_filter():
 def main(stdscr):
     global control
     global imu
+    global conf
 
     # set up terminal output
     curses.use_default_colors()
@@ -293,12 +296,12 @@ def main(stdscr):
 
     # initialize threads
     control_t = Thread(target=read_controller, args=(ps3,))
-    imu_t = Thread(target=read_imu, args=(imu_dev,))
+    imu_t = Thread(target=read_imu, args=(imu_dev,stdscr,))
     control_t.start()
     imu_t.start()
 
     time.sleep(0.5) # wait for imu to init...
-    calibrate_imu(50, stdscr)
+    calibrate_imu(conf['num_cal'], stdscr)
 
     while True:
         update_scr(stdscr)
