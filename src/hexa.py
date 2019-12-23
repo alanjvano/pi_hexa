@@ -220,7 +220,7 @@ def calibrate_imu(num_cal, stdscr):
     deadband = [0.0,0.0,0.0]
     min = [0.0, 0.0, 0.0]
     max = [0.0, 0.0, 0.0]
-    
+
     for j in range (0, num_cal):
         imu.acquire()
         for i, each in enumerate(imu.get().a_vel):
@@ -272,7 +272,7 @@ def complementary_filter():
     # p = integral(dp/dt)
     # because this is a discrete case, just sum change times time elapsed
     imu.acquire()
-    delta_t = (imu.get().time_cur - imu.get().time_init) * 10**6    # convert from microseconds to seconds
+    delta_t = (imu.get().time_cur - imu.get().time_init) / 10**6    # convert from microseconds to seconds
     for i, each in enumerate(tmp_gyro):
         each = imu.get().a_vel * delta_t
 
