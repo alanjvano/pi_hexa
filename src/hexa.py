@@ -62,8 +62,7 @@ class Spin_lock:
         return self.resource
 
 class Controller:
-    def __init__(self, dev):
-        self.device = dev
+    def __init__(self):
         self.x = False
         self.o = False
         self.tri = False
