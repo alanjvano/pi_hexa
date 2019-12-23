@@ -301,6 +301,7 @@ def main(stdscr):
     imu_t.start()
     stdscr.addstr("reached this point!!!!!!!!!")
     stdscr.refresh()
+    test = 1
 
     sleep.time(0.5) # wait for imu to init...
     calibrate_imu(50, stdscr)
