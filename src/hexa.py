@@ -44,7 +44,7 @@ ps3_codes = {'l_but':295, 'u_but':292, 'r_but':293, 'd_but':294,
 # class used for interacting with shared memory
 class Spin_lock:
     def __init__(self, a):
-        self.resource = self.a
+        self.resource = a
         self.locked = False
 
     def acquire(self):
@@ -62,8 +62,7 @@ class Spin_lock:
         return self.resource
 
 class Controller:
-    def __init__(self, dev):
-        self.device = dev
+    def __init__(self):
         self.x = False
         self.o = False
         self.tri = False
@@ -89,7 +88,7 @@ class Controller:
 class IMU:
     def __init__(self):
         self.accel = [0.0,0.0,0.0]
-        self.accel_filtered = [0.0.0.0.0.0]
+        self.accel_filtered = [0.0,0.0,0.0]
         self.vel = [0.0,0.0,0.0]
         self.pos = [0.0,0.0,0.0]
         self.a_vel = [0.0,0.0,0.0]
@@ -108,19 +107,19 @@ def start_imu(stdscr):
     # set up IMU
     global poll_interval
     SETTINGS_FILE = "RTIMUlib"
-    stdscr.addstr("setings file: " + SETTINGS_FILE + ".ini")
+    stdscr.addstr("setings file: " + SETTINGS_FILE + ".ini\n")
     if not os.path.exists(SETTINGS_FILE + ".ini"):  # if no file, create one
-        stdscr.addstr("file not found, created settings file")
+        stdscr.addstr("file not found, created settings file\n")
     settings = RTIMU.Settings(SETTINGS_FILE)
     imu_dev = RTIMU.RTIMU(settings) # creating IMU object
-    stdscr.addstr("IMU Name: " + imu_dev.IMUName())
+    stdscr.addstr("IMU Name: " + imu_dev.IMUName() + "\n")
 
     if (not imu_dev.IMUInit()):
-        stdscr.addstr("failed to init IMU")
+        stdscr.addstr("failed to init IMU\n")
         sys.exit(1)
     else:
-        stdscr.addstr("successfully initialized IMU")
-    stdscr.refesh()
+        stdscr.addstr("successfully initialized IMU\n")
+    stdscr.refresh()
 
     imu_dev.setSlerpPower(0.02)
     imu_dev.setGyroEnable(True)
@@ -128,12 +127,12 @@ def start_imu(stdscr):
     imu_dev.setCompassEnable(True)
 
     poll_interval = imu_dev.IMUGetPollInterval()
-    stdscr.addstr("poll interval: %d" % poll_interval)
+    stdscr.addstr("poll interval: %d\n" % poll_interval)
     stdscr.refresh()
     return imu_dev
 
 def init_controller(stdscr):
-    stdscr.addstr(1,0,"initializing controller...")
+    stdscr.addstr(1,0,"initializing controller...\n")
     stdscr.refresh()
     conn = False
 
@@ -145,7 +144,7 @@ def init_controller(stdscr):
                 dev = device.path
                 ps3 = evdev.InputDevice(dev)
                 stdscr.addstr(2,0,device.name+' '+device.path)
-                stdscr.addstr(3,0,"found ps3 contoller")
+                stdscr.addstr(3,0,"found ps3 contoller\n")
                 stdscr.refresh()
                 conn = True
 
@@ -155,7 +154,7 @@ def init_controller(stdscr):
         stdscr.refresh()
         if event.type == 1 and event.code == 315 and event.value == 1:
             stdscr.erase()
-            stdscr.addstr('starting')
+            stdscr.addstr('starting\n')
             stdscr.refresh()
             time.sleep(1)
             return ps3
@@ -164,7 +163,7 @@ def read_controller(dev):
     global control
     for event in dev.read_loop():
         control.acquire()
-        if event.type == 1 and event.code == 315 and event.value == 1:
+        pass    # do nothing for now
         control.release()
 
 def read_imu(dev):
@@ -211,7 +210,7 @@ def read_imu(dev):
 def calibrate_imu(num_cal, stdscr):
     global imu
     global poll_interval
-    stdscr.addstr('Calibrating IMU: {} measurements'.format(num_cal))
+    stdscr.addstr('Calibrating IMU: {} measurements\n'.format(num_cal))
     stdscr.refesh()
     bias = [0.0, 0.0, 0.0]
     min = [0.0, 0.0, 0.0]
@@ -232,8 +231,8 @@ def calibrate_imu(num_cal, stdscr):
     imu.get().deadband = max - min
     imu.get().calibrated = True
     imu.release()
-    stdscr.addstr('Calibration Complete.')
-    stdscr.addstr('bias: {}   deadband: {}'.format(bias, max-min))
+    stdscr.addstr('Calibration Complete.\n')
+    stdscr.addstr('bias: {}   deadband: {}\n'.format(bias, max-min))
     stdscr.refesh()
     time.sleep(2)
 
@@ -275,7 +274,7 @@ def complementary_filter():
     imu.get().angle_comp += conf['gyro_sensitivity'] * np.asarray(tmp_gyro) + (1-conf['gyro_sensitivity']) * np.asarray(tmp_acc)
     imu.release()
 
-def main():
+def main(stdscr):
     global control
     global imu
 
@@ -288,14 +287,20 @@ def main():
     control = Spin_lock(Controller())
 
     # initialize imu
-    imu_dev = start_imu()
+    imu_dev = start_imu(stdscr)
     imu = Spin_lock(IMU())
 
+    stdscr.addstr('made it here\n')
+    #stdscr.refresh()
     # initialize threads
-    control_t = Thread(target=read_controller(ps3))
+    #control_t = Thread(target=read_controller(ps3))
+    #stdscr.refresh()
     imu_t = Thread(target=read_imu(imu_dev))
+    stdscr.refresh()
     control_t.start()
     imu_t.start()
+    stdscr.addstr("reached this point!!!!!!!!!")
+    stdscr.refresh()
 
     sleep.time(0.5) # wait for imu to init...
     calibrate_imu(50, stdscr)
@@ -305,4 +310,4 @@ def main():
         #time.sleep(0.1)
 
 if __name__ == "__main__":
-    curses.wrapper(main())
+    curses.wrapper(main)
