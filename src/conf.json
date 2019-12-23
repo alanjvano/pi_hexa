@@ -1,3 +1,4 @@
 {
-	"gyro_sensitivity": 0.98
+	"gyro_sensitivity": 0.98,
+	"accel_filter_num": 11
 }

@@ -15,13 +15,13 @@ class Mutex:
             pass
 
         self.locked = True
-    
+
     def release(self):
         self.locked = False
-    
+
     def set(self, val):
         self.resource = val
-    
+
     def get(self):
         return self.resource
 
@@ -48,7 +48,7 @@ class Controller:
         self.right_y = 0.0
         self.l_trig = 0.0
         self.r_trig = 0.0
-    
+
 class IMU:
     def __init__(self):
         self.accel = (0.0, 0.0, 0.0)
@@ -81,7 +81,7 @@ def read_gps():
 def main():
     global control
     global imu
-    
+
     control = Mutex(Controller())
     imu = Mutex(IMU())
 
@@ -99,7 +99,7 @@ def main():
     control.acquire()
     print("Control left stick: " + str(control.get().l_joy))
     control.release()
-    
+
 
 
 if __name__ == '__main__':
