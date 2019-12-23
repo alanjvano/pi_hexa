@@ -2,7 +2,6 @@ import sys, getopt
 sys.path.append('.')
 import RTIMU
 import os.path
-
 import time
 import math
 import copy
@@ -97,7 +96,6 @@ class IMU:
         self.angle_comp = [0.0,0.0,0.0]
         self.angle_fus = [0.0,0.0,0.0]
         self.angle_fus_q = [0.0,0.0,0.0]
-        self.comp = [0.0,0.0,0.0]
         self.time_prev = 0  # microseconds
         self.time_cur = 0
         self.bias = 0.0
@@ -177,8 +175,6 @@ def read_imu(dev):
         if dev.IMURead():
            # read data from IMU
            data = dev.getIMUData()
-           stdscr.addstr(10,0,'reading imu\n')
-           stdscr.refresh
 
            imu.acquire()
            imu.get().a_vel = data['gyro']
@@ -229,8 +225,8 @@ def calibrate_imu(num_cal, stdscr):
                 min[i] = each
         imu.release()
         time.sleep(poll_interval * 1.0/1000.0)
-    bias[:] = [k / num_cal for k in bias] 
-    deadband[:] = [(max[m] - min[m]) for m in range(len(min))]  
+    bias[:] = [k / num_cal for k in bias]
+    deadband[:] = [(max[m] - min[m]) for m in range(len(min))]
     imu.acquire()
     imu.get().bias = bias
     imu.get().deadband = deadband
