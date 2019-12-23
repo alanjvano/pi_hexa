@@ -96,7 +96,6 @@ class IMU:
         self.angle_comp = [0.0,0.0,0.0]
         self.angle_fus = [0.0,0.0,0.0]
         self.angle_fus_q = [0.0,0.0,0.0]
-        self.comp = [0.0,0.0,0.0]
         self.time_prev = 0  # microseconds
         self.time_cur = 0
         self.bias = 0.0
@@ -176,8 +175,6 @@ def read_imu(dev):
         if dev.IMURead():
            # read data from IMU
            data = dev.getIMUData()
-           stdscr.addstr(10,0,'reading imu\n')
-           stdscr.refresh
 
            imu.acquire()
            imu.get().a_vel = data['gyro']
