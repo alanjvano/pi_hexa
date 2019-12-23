@@ -290,17 +290,11 @@ def main(stdscr):
     imu_dev = start_imu(stdscr)
     imu = Spin_lock(IMU())
 
-    stdscr.addstr('made it here\n')
-    #stdscr.refresh()
     # initialize threads
-    #control_t = Thread(target=read_controller(ps3))
-    #stdscr.refresh()
-    imu_t = Thread(target=read_imu(imu_dev))
-    stdscr.refresh()
+    control_t = Thread(target=read_controller, args=(ps3,))
+    imu_t = Thread(target=read_imu, args=(imu_dev,))
     control_t.start()
     imu_t.start()
-    stdscr.addstr("reached this point!!!!!!!!!")
-    stdscr.refresh()
 
     sleep.time(0.5) # wait for imu to init...
     calibrate_imu(50, stdscr)
