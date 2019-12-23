@@ -2,7 +2,6 @@ import sys, getopt
 sys.path.append('.')
 import RTIMU
 import os.path
-
 import time
 import math
 import copy
@@ -229,8 +228,8 @@ def calibrate_imu(num_cal, stdscr):
                 min[i] = each
         imu.release()
         time.sleep(poll_interval * 1.0/1000.0)
-    bias[:] = [k / num_cal for k in bias] 
-    deadband[:] = [(max[m] - min[m]) for m in range(len(min))]  
+    bias[:] = [k / num_cal for k in bias]
+    deadband[:] = [(max[m] - min[m]) for m in range(len(min))]
     imu.acquire()
     imu.get().bias = bias
     imu.get().deadband = deadband
