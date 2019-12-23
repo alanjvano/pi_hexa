@@ -295,6 +295,12 @@ def main(stdscr):
     imu_t = Thread(target=read_imu, args=(imu_dev,))
     control_t.start()
     imu_t.start()
+<<<<<<< HEAD
+=======
+    stdscr.addstr("reached this point!!!!!!!!!")
+    stdscr.refresh()
+    test = 1
+>>>>>>> 8821e9955d91c486f878e45786215b1cecc586d7
 
     sleep.time(0.5) # wait for imu to init...
     calibrate_imu(50, stdscr)
