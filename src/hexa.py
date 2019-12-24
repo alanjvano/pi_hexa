@@ -12,6 +12,10 @@ import curses
 import warnings
 import evdev
 from threading import Thread
+import board
+import busio
+import digitalio
+import adafruit_tlc59711
 
 # init global variables
 global control
@@ -267,6 +271,14 @@ def complementary_filter():
 
     tmp_gyro = [0.0,0.0,0.0]
     tmp_acc = [0.0,0.0,0.0]
+
+    # init rgb
+    spi = busio.SPI(clock=board.SCK, MOSI=board.MOSI)
+    rgb = adafruit_tlc59711.TLC59711(spi)
+    rgb[0] = (65535, 0, 0)
+    rgb[1] = (65535, 0, 0)
+    rgb[2] = (0, 16000, 16000)
+    rgb[3] = (0, 16000, 16000)
 
     # gyroscope data returns only change in pos
     # p = integral(dp/dt)
