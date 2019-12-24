@@ -19,6 +19,13 @@ import adafruit_tlc59711
 from adafruit_servokit import ServoKit
 import logging
 
+# init global variables
+global control
+global imu
+global poll_interval
+global conf
+global motors
+
 # argument parser
 parser = argparse.ArgumentParser(description="hexa")
 parser.add_argument('-c', '--conf', required=True, help='path to json config file needed')
@@ -29,17 +36,14 @@ print(args)
 warnings.filterwarnings("ignore")
 conf = json.load(open(args["conf"]))
 
-# init global variables
-global control
-global imu
-global poll_interval
-global conf
-global motors =  conf['motors']
+motors = conf['motors']
 
 # init logging info
-logging.basicConfig(filename='debug.log',level=logging.DEBUG)
-logging.debug('LOGGING INFORMATION:
-logging.basicConfig(format='[%(levelname)s] (%(threadName)-10s) %(message)s',)
+logging.basicConfig(filename='debug.log',
+                    filemode='w',
+                    level=logging.DEBUG, 
+                    format='%(asctime)s %(msecs)d [%levelname)s] (%(threadName)-10s) %(message)s')
+#logging.debug('LOGGING INFORMATION:')
 
 # set up line pointer for curses interface
 #global curses_line 0
@@ -191,7 +195,7 @@ def read_imu(dev,stdscr):
     stdscr.addstr('started imu thread...\n')
     stdscr.refresh()
     while True:
-        logging.debug('running')
+        #logging.debug('running')
         if dev.IMURead():
            # read data from IMU
            data = dev.getIMUData()
