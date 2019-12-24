@@ -54,19 +54,20 @@ ps3_codes = {'l_but':295, 'u_but':292, 'r_but':293, 'd_but':294,
 # initialize handler for logging to file
 def init_logging():
     # init logging info
-    formatter = logging.Formatter('%(asctime)s %(msecs)d [%levelname)s] (%(threadName)-10s) %(message)s')
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('[%levelname)s] (%(threadName)-10s) %(message)s')
+    #logger = logging.getLogger(__name__)
+    #logger.setLevel(logging.DEBUG)
 
     # create the handler
     handler = logging.FileHandler('debug.log')
-    handler.setLevel(logging.DEBUG)
+    #handler.setLevel(logging.DEBUG)
     handler.setFormatter(formatter)
 
     # add handler to logger
-    logger.addHandler(handler)
+    logging.getLogger().addHandler(handler)
+    logging.getLogger().setLevel(logging.DEBUG)
 
-    return logger
+    return logging
 
 # class used for interacting with shared memory
 class Spin_lock:
@@ -204,8 +205,6 @@ def read_imu(dev,logger):
     global conf
     size = conf['accel_filter_num']
     accel_hist = np.zeros(size)
-    stdscr.addstr('started imu thread...\n')
-    stdscr.refresh()
     while True:
         #logging.debug('running')
         if dev.IMURead():
@@ -346,8 +345,8 @@ def main(stdscr):
     imu = Spin_lock(IMU())
 
     # initialize threads
-    control_t = Thread(target=read_controller, args=(ps3,logger))
-    imu_t = Thread(target=read_imu, args=(imu_dev,logger))
+    control_t = Thread(target=read_controller, args=(ps3,logger,))
+    imu_t = Thread(target=read_imu, args=(imu_dev,logger,))
     control_t.start()
     imu_t.start()
 
