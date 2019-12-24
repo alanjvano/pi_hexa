@@ -38,11 +38,6 @@ conf = json.load(open(args["conf"]))
 
 motors = conf['motors']
 
-# init logging info
-logging.basicConfig(filename='debug.log',
-                    filemode='w',
-                    level=logging.DEBUG, 
-                    format='%(asctime)s %(msecs)d [%levelname)s] (%(threadName)-10s) %(message)s')
 #logging.debug('LOGGING INFORMATION:')
 
 # set up line pointer for curses interface
@@ -55,6 +50,23 @@ ps3_codes = {'l_but':295, 'u_but':292, 'r_but':293, 'd_but':294,
         'start':291, 'sel':288,
         'l_joy':289, 'r_joy':290}
 #Note: type 3: analog, type 1: key press
+
+# initialize handler for logging to file
+def init_logging():
+    # init logging info
+    formatter = logging.Formatter('%(asctime)s %(msecs)d [%levelname)s] (%(threadName)-10s) %(message)s')
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+
+    # create the handler
+    handler = logging.FileHandler('debug.log')
+    handler.setLevel(logging.DEBUG)
+    handler.setFormatter(formatter)
+
+    # add handler to logger
+    logger.addHandler(handler)
+
+    return logger
 
 # class used for interacting with shared memory
 class Spin_lock:
@@ -177,16 +189,16 @@ def init_controller(stdscr):
             time.sleep(1)
             return ps3
 
-def read_controller(dev):
-    logging.debug('starting')
+def read_controller(dev,logger):
+    logger.debug('starting')
     global control
     for event in dev.read_loop():
         control.acquire()
         pass    # do nothing for now
         control.release()
 
-def read_imu(dev,stdscr):
-    logging.debug('starting')
+def read_imu(dev,logger):
+    logger.debug('starting')
     global imu
     global poll_interval
     global conf
@@ -201,7 +213,7 @@ def read_imu(dev,stdscr):
            data = dev.getIMUData()
 
            imu.acquire()
-           logging.debug('acquired imu')
+           logger.debug('acquired imu')
            imu.get().a_vel = data['gyro']
            imu.get().angle_fus = data['fusionPose']
            imu.get().angle_fus_q = data['fusionQPose']
@@ -322,6 +334,9 @@ def main(stdscr):
     curses.use_default_colors()
     stdscr.scrollok(1) #enable scrolling
 
+    # init logger
+    logger = init_logging()
+
     # initialize controller
     ps3 = init_controller(stdscr)
     control = Spin_lock(Controller())
@@ -331,8 +346,8 @@ def main(stdscr):
     imu = Spin_lock(IMU())
 
     # initialize threads
-    control_t = Thread(target=read_controller, args=(ps3,))
-    imu_t = Thread(target=read_imu, args=(imu_dev,stdscr,))
+    control_t = Thread(target=read_controller, args=(ps3,logger))
+    imu_t = Thread(target=read_imu, args=(imu_dev,logger))
     control_t.start()
     imu_t.start()
 
