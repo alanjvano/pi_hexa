@@ -16,12 +16,8 @@ import board
 import busio
 import digitalio
 import adafruit_tlc59711
-
-# init global variables
-global control
-global imu
-global poll_interval
-global conf
+from adafruit_servokit import ServoKit
+import logging
 
 # argument parser
 parser = argparse.ArgumentParser(description="hexa")
@@ -32,6 +28,18 @@ print(args)
 # deal with warnings and load config
 warnings.filterwarnings("ignore")
 conf = json.load(open(args["conf"]))
+
+# init global variables
+global control
+global imu
+global poll_interval
+global conf
+global motors =  conf['motors']
+
+# init logging info
+logging.basicConfig(filename='debug.log',level=logging.DEBUG)
+logging.debug('LOGGING INFORMATION:
+logging.basicConfig(format='[%(levelname)s] (%(threadName)-10s) %(message)s',)
 
 # set up line pointer for curses interface
 #global curses_line 0
@@ -166,6 +174,7 @@ def init_controller(stdscr):
             return ps3
 
 def read_controller(dev):
+    logging.debug('starting')
     global control
     for event in dev.read_loop():
         control.acquire()
@@ -173,6 +182,7 @@ def read_controller(dev):
         control.release()
 
 def read_imu(dev,stdscr):
+    logging.debug('starting')
     global imu
     global poll_interval
     global conf
@@ -181,11 +191,13 @@ def read_imu(dev,stdscr):
     stdscr.addstr('started imu thread...\n')
     stdscr.refresh()
     while True:
+        logging.debug('running')
         if dev.IMURead():
            # read data from IMU
            data = dev.getIMUData()
 
            imu.acquire()
+           logging.debug('acquired imu')
            imu.get().a_vel = data['gyro']
            imu.get().angle_fus = data['fusionPose']
            imu.get().angle_fus_q = data['fusionQPose']
