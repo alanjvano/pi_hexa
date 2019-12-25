@@ -360,7 +360,7 @@ def main(stdscr):
         logger.debug('threads failed to start')
 
     time.sleep(0.5) # wait for imu to init...
-    calibrate_imu(conf['num_cal'], stdscr)
+    calibrate_imu(conf['num_cal'], stdscr, logger)
 
     while True:
         #update_scr(stdscr)
