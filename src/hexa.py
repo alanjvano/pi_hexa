@@ -202,6 +202,7 @@ def read_controller(dev,logger):
 
 def read_imu(dev,logger):
     logger.debug('starting')
+    logger.debug('imu info: {}'.format(dev.IMUName()))
     global imu
     global poll_interval
     global conf
