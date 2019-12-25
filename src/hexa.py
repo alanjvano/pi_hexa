@@ -54,7 +54,7 @@ ps3_codes = {'l_but':295, 'u_but':292, 'r_but':293, 'd_but':294,
 # initialize handler for logging to file
 def init_logging():
     # init logging info
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] (%(threadName)-20s) %(message)s')
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] (%(threadName)-15s) %(message)s')
     #logger = logging.getLogger(__name__)
     #logger.setLevel(logging.DEBUG)
 
@@ -362,8 +362,8 @@ def main(stdscr):
 
     # initialize threads
     try:
-        control_t = Thread(name='imu_thread', target=read_controller, args=(ps3,logger,))
-        imu_t = Thread(name='controller_thread', target=read_imu, args=(imu_dev,logger,))
+        control_t = Thread(name='contr_thread', target=read_controller, args=(ps3,logger,))
+        imu_t = Thread(name='imu_thread', target=read_imu, args=(imu_dev,logger,))
         #control_t.setDaemon(true)
         #imu_t.setDaemon(true)
         control_t.start()
