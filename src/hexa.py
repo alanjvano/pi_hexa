@@ -54,7 +54,7 @@ ps3_codes = {'l_but':295, 'u_but':292, 'r_but':293, 'd_but':294,
 # initialize handler for logging to file
 def init_logging():
     # init logging info
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] (%(threadName)-10s) %(message)s')
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] (%(threadName)-20s) %(message)s')
     #logger = logging.getLogger(__name__)
     #logger.setLevel(logging.DEBUG)
 
