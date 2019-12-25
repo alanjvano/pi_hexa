@@ -208,39 +208,40 @@ def read_imu(dev,logger):
     while True:
         #logging.debug('running')
         if dev.IMURead():
-           # read data from IMU
-           data = dev.getIMUData()
 
-           imu.acquire()
-           logger.debug('acquired imu')
-           imu.get().a_vel = data['gyro']
-           imu.get().angle_fus = data['fusionPose']
-           imu.get().angle_fus_q = data['fusionQPose']
-           imu.get().accel = data['accel']
-           imu.get().comp = data['compass']
-           imu.get().time_prev = imu.get().time_cur
-           imu.get().time_cur = data['timestamp']
-           # print((time_cur - self.last_update)*10**6)
+            # read data from IMU
+            data = dev.getIMUData()
 
-           if imu.get().calibrated:
-               # check deadband and account for bias
-               if ((imu.get().a_vel < imu.get().bias + imu.get().deadband) or (imu.get().a_vel > imu.get().bias - imu.get().deadband)):
-                   imu.get().a_vel_filtered = 0.0
-               else:
-                   imu.get().a_vel_filtered = imu.get().a_vel - imu.get().bias
+            imu.acquire()
+            logger.debug('acquired imu')
+            imu.get().a_vel = data['gyro']
+            imu.get().angle_fus = data['fusionPose']
+            imu.get().angle_fus_q = data['fusionQPose']
+            imu.get().accel = data['accel']
+            imu.get().comp = data['compass']
+            imu.get().time_prev = imu.get().time_cur
+            imu.get().time_cur = data['timestamp']
+            # print((time_cur - self.last_update)*10**6)
 
-               # use median filter for acceleromater readings to help with spikes
-               accel_hist = np.roll(accel_hist, 1)
-               accel_hist[0] = imu.get().accel
-               imu.get().accel_filtered = np.sort(accel_hist)[int(size/2.0)]
-               imu.release()
+            if imu.get().calibrated:
+                # check deadband and account for bias
+                if ((imu.get().a_vel < imu.get().bias + imu.get().deadband) or (imu.get().a_vel > imu.get().bias - imu.get().deadband)):
+                    imu.get().a_vel_filtered = 0.0
+                else:
+                    imu.get().a_vel_filtered = imu.get().a_vel - imu.get().bias
 
-               # update complementary filter
-               complementary_filter()
-           else:
-               imu.release()
+                # use median filter for acceleromater readings to help with spikes
+                accel_hist = np.roll(accel_hist, 1)
+                accel_hist[0] = imu.get().accel
+                imu.get().accel_filtered = np.sort(accel_hist)[int(size/2.0)]
+                imu.release()
 
-           time.sleep(poll_interval * 1.0/1000.0)
+                # update complementary filter
+                complementary_filter()
+            else:
+                imu.release()
+
+            time.sleep(poll_interval * 1.0/1000.0)
 
 def calibrate_imu(num_cal, stdscr):
     global imu
