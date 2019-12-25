@@ -54,7 +54,7 @@ ps3_codes = {'l_but':295, 'u_but':292, 'r_but':293, 'd_but':294,
 # initialize handler for logging to file
 def init_logging():
     # init logging info
-    formatter = logging.Formatter('[%(levelname)s] (%(threadName)-10s) %(message)s')
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] (%(threadName)-10s) %(message)s')
     #logger = logging.getLogger(__name__)
     #logger.setLevel(logging.DEBUG)
 
@@ -131,7 +131,7 @@ class IMU:
         self.deadband = 0.0
         self.calibrated = False
 
-def start_imu(stdscr):
+def start_imu(stdscr, logger):
     # set up IMU
     global poll_interval
     SETTINGS_FILE = "RTIMUlib"
@@ -157,9 +157,10 @@ def start_imu(stdscr):
     poll_interval = imu_dev.IMUGetPollInterval()
     stdscr.addstr("poll interval: %d\n" % poll_interval)
     stdscr.refresh()
+    logger.info('initialized imu unit: {}, poll_interval = {}'.format(imu_dev.IMUName(), poll_interval))
     return imu_dev
 
-def init_controller(stdscr):
+def init_controller(stdscr, logger):
     stdscr.addstr(1,0,"initializing controller...\n")
     stdscr.refresh()
     conn = False
@@ -176,6 +177,7 @@ def init_controller(stdscr):
                 ps3 = evdev.InputDevice(dev)
                 stdscr.addstr(2,0,device.name+' '+device.path)
                 stdscr.addstr(3,0,"found ps3 contoller\n")
+                logger.info('found controller: {} - {}'.format(device.name, device.path))
                 stdscr.refresh()
                 conn = True
 
@@ -244,7 +246,7 @@ def read_imu(dev,logger):
 
             time.sleep(poll_interval * 1.0/1000.0)
 
-def calibrate_imu(num_cal, stdscr):
+def calibrate_imu(num_cal, stdscr, logger):
     global imu
     global poll_interval
     stdscr.addstr('Calibrating IMU: {} measurements\n'.format(num_cal))
@@ -278,6 +280,8 @@ def calibrate_imu(num_cal, stdscr):
     stdscr.addstr('bias: {}   deadband: {}\n'.format(bias, deadband))
     stdscr.refresh()
     time.sleep(2)
+
+    logger.info('calibrated imu: deadband={}, bias={}'.format(deadband, bias))
 
 # display hopefully useful info
 # things to add: bias, deadband, accel, vel, etc.
@@ -339,18 +343,21 @@ def main(stdscr):
     logger = init_logging()
 
     # initialize controller
-    ps3 = init_controller(stdscr)
+    ps3 = init_controller(stdscr, logger)
     control = Spin_lock(Controller())
 
     # initialize imu
-    imu_dev = start_imu(stdscr)
+    imu_dev = start_imu(stdscr, logger)
     imu = Spin_lock(IMU())
 
     # initialize threads
-    control_t = Thread(target=read_controller, args=(ps3,logger,))
-    imu_t = Thread(target=read_imu, args=(imu_dev,logger,))
-    control_t.start()
-    imu_t.start()
+    try:
+        control_t = Thread(target=read_controller, args=(ps3,logger,))
+        imu_t = Thread(target=read_imu, args=(imu_dev,logger,))
+        control_t.start()
+        imu_t.start()
+    except:
+        logger.debug('threads failed to start')
 
     time.sleep(0.5) # wait for imu to init...
     calibrate_imu(conf['num_cal'], stdscr)
