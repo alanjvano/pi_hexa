@@ -54,7 +54,7 @@ ps3_codes = {'l_but':295, 'u_but':292, 'r_but':293, 'd_but':294,
 # initialize handler for logging to file
 def init_logging():
     # init logging info
-    formatter = logging.Formatter('[%levelname)s] (%(threadName)-10s) %(message)s')
+    formatter = logging.Formatter('[%(levelname)s] (%(threadName)-10s) %(message)s')
     #logger = logging.getLogger(__name__)
     #logger.setLevel(logging.DEBUG)
 
@@ -208,6 +208,7 @@ def read_imu(dev,logger):
     while True:
         #logging.debug('running')
         if dev.IMURead():
+            logger.debug('reading imu')
 
             # read data from IMU
             data = dev.getIMUData()
@@ -355,7 +356,8 @@ def main(stdscr):
     calibrate_imu(conf['num_cal'], stdscr)
 
     while True:
-        update_scr(stdscr)
+        #update_scr(stdscr)
+        pass
         #time.sleep(0.1)
 
 if __name__ == "__main__":
