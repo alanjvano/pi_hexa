@@ -200,7 +200,7 @@ def read_controller(dev,logger):
         logger.debug('acquired control')
         pass    # do nothing for now
         control.release()
-        logger.debug('released imu')
+        logger.debug('released control')
 
 def read_imu(dev,logger):
     logger.debug('starting')
@@ -261,7 +261,7 @@ def calibrate_imu(num_cal, stdscr, logger):
 
     for j in range (0, num_cal):
         imu.acquire()
-        logger.debug('acquired imu (calibrated)')
+        logger.debug('acquired imu (calibrate)')
         for i, each in enumerate(imu.get().a_vel):
             bias[i] = bias[i] + each
             if each > max[i]:
