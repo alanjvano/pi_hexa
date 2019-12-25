@@ -1,6 +1,5 @@
-[DEBUG] (Thread-1  ) starting
-[DEBUG] (Thread-2  ) starting
-[DEBUG] (Thread-1  ) starting
-[DEBUG] (Thread-2  ) starting
-[DEBUG] (Thread-1  ) starting
-[DEBUG] (Thread-2  ) starting
+2019-12-25 17:07:19,816 [INFO] (MainThread) found controller: PLAYSTATION(R)3Conteroller-PANHAI - /dev/input/event1
+2019-12-25 17:07:23,198 [INFO] (MainThread) initialized imu unit: MPU-9250, poll_interval = 4
+2019-12-25 17:07:23,200 [DEBUG] (Thread-1  ) starting
+2019-12-25 17:07:23,201 [DEBUG] (Thread-2  ) starting
+2019-12-25 17:07:23,202 [DEBUG] (Thread-2  ) imu info: MPU-9250
