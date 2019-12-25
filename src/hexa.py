@@ -59,7 +59,7 @@ def init_logging():
     #logger.setLevel(logging.DEBUG)
 
     # create the handler
-    handler = logging.FileHandler('debug.log')
+    handler = logging.FileHandler('debug.log', mode='w')
     #handler.setLevel(logging.DEBUG)
     handler.setFormatter(formatter)
 
