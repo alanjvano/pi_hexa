@@ -277,12 +277,12 @@ def calibrate_imu(num_cal, stdscr, logger):
     bias[:] = [k / num_cal for k in bias]
     deadband[:] = [(max[m] - min[m]) for m in range(len(min))]
     imu.acquire()
-    logger.debug('acquired imu')
+    logger.debug('acquired imu (set bias and deadband)')
     imu.get().bias = bias
     imu.get().deadband = deadband
     imu.get().calibrated = True
     imu.release()
-    logger.debug('released imu')
+    logger.debug('released imu (set bias and deadband)')
     stdscr.addstr('Calibration Complete.\n')
     stdscr.addstr('bias: {}   deadband: {}\n'.format(bias, deadband))
     stdscr.refresh()
@@ -362,8 +362,8 @@ def main(stdscr):
 
     # initialize threads
     try:
-        control_t = Thread(target=read_controller, args=(ps3,logger,))
-        imu_t = Thread(target=read_imu, args=(imu_dev,logger,))
+        control_t = Thread(name='imu_thread', target=read_controller, args=(ps3,logger,))
+        imu_t = Thread(name='controller_thread', target=read_imu, args=(imu_dev,logger,))
         control_t.start()
         imu_t.start()
     except:
