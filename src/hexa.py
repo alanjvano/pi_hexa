@@ -197,8 +197,10 @@ def read_controller(dev,logger):
     global control
     for event in dev.read_loop():
         control.acquire()
+        logger.debug('acquired control')
         pass    # do nothing for now
         control.release()
+        logger.debug('released imu')
 
 def read_imu(dev,logger):
     logger.debug('starting')
@@ -259,6 +261,7 @@ def calibrate_imu(num_cal, stdscr, logger):
 
     for j in range (0, num_cal):
         imu.acquire()
+        logger.debug('acquired imu (calibrated)')
         for i, each in enumerate(imu.get().a_vel):
             bias[i] = bias[i] + each
             if each > max[i]:
@@ -266,6 +269,7 @@ def calibrate_imu(num_cal, stdscr, logger):
             elif each < min[i]:
                 min[i] = each
         imu.release()
+        logger.debug('released imu (calibrate)')
 
         # wait for imu readings to update
         time.sleep(2.0 * poll_interval * 1.0/1000.0)
@@ -273,10 +277,12 @@ def calibrate_imu(num_cal, stdscr, logger):
     bias[:] = [k / num_cal for k in bias]
     deadband[:] = [(max[m] - min[m]) for m in range(len(min))]
     imu.acquire()
+    logger.debug('acquired imu')
     imu.get().bias = bias
     imu.get().deadband = deadband
     imu.get().calibrated = True
     imu.release()
+    logger.debug('released imu')
     stdscr.addstr('Calibration Complete.\n')
     stdscr.addstr('bias: {}   deadband: {}\n'.format(bias, deadband))
     stdscr.refresh()
@@ -290,6 +296,7 @@ def update_scr(stdscr):
     global imu
     stdscr.erase()
     imu.acquire()
+    logger.debug('acquired imu')
     stdscr.addstr(1,0,'gyro    - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().a_vel)))
     stdscr.addstr(2,0,'accel   - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(imu.get().accel))
     stdscr.addstr(3,0,'fusion  - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_fus)))
@@ -297,6 +304,7 @@ def update_scr(stdscr):
     stdscr.addstr(5,0,'complem - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_comp)))
     stdscr.addstr(6,0,'time - {}'.format(imu.get().time_cur))
     imu.release()
+    logger.debug('released imu')
     stdscr.refresh()
 
 def complementary_filter():
@@ -318,6 +326,7 @@ def complementary_filter():
     # p = integral(dp/dt)
     # because this is a discrete case, just sum change times time elapsed
     imu.acquire()
+    logger.debug('acquired imu')
     delta_t = (imu.get().time_cur - imu.get().time_init) / 10**6    # convert from microseconds to seconds
     for i, each in enumerate(tmp_gyro):
         each = imu.get().a_vel * delta_t
