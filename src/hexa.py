@@ -192,7 +192,7 @@ def init_controller(stdscr, logger):
             time.sleep(1)
             return ps3
 
-def read_controller(logger):
+def read_controller(dev,logger):
     logger.debug('starting')
     global control
     for event in dev.read_loop():
@@ -201,48 +201,19 @@ def read_controller(logger):
         control.release()
 
 def read_imu(dev,logger):
+    logger.debug('starting')
     global imu
     global poll_interval
     global conf
-
-    logger.debug('starting')
-
-    # set up IMU
-    global poll_interval
-    SETTINGS_FILE = "RTIMUlib"
-    stdscr.addstr("setings file: " + SETTINGS_FILE + ".ini\n")
-    if not os.path.exists(SETTINGS_FILE + ".ini"):  # if no file, create one
-        stdscr.addstr("file not found, created settings file\n")
-    settings = RTIMU.Settings(SETTINGS_FILE)
-    imu_dev = RTIMU.RTIMU(settings) # creating IMU object
-    stdscr.addstr("IMU Name: " + imu_dev.IMUName() + "\n")
-
-    if (not imu_dev.IMUInit()):
-        stdscr.addstr("failed to init IMU\n")
-        sys.exit(1)
-    else:
-        stdscr.addstr("successfully initialized IMU\n")
-    stdscr.refresh()
-
-    imu_dev.setSlerpPower(0.02)
-    imu_dev.setGyroEnable(True)
-    imu_dev.setAccelEnable(True)
-    imu_dev.setCompassEnable(True)
-
-    poll_interval = imu_dev.IMUGetPollInterval()
-    stdscr.addstr("poll interval: %d\n" % poll_interval)
-    stdscr.refresh()
-    logger.info('initialized imu unit: {}, poll_interval = {}'.format(imu_dev.IMUName(), poll_interval))
-
     size = conf['accel_filter_num']
     accel_hist = np.zeros(size)
     while True:
         #logging.debug('running')
-        if imu_dev.IMURead():
+        if dev.IMURead():
             logger.debug('reading imu')
 
             # read data from IMU
-            data = imu_dev.getIMUData()
+            data = dev.getIMUData()
 
             imu.acquire()
             logger.debug('acquired imu')
@@ -376,13 +347,13 @@ def main(stdscr):
     control = Spin_lock(Controller())
 
     # initialize imu
-    #imu_dev = start_imu(stdscr, logger)
+    imu_dev = start_imu(stdscr, logger)
     imu = Spin_lock(IMU())
 
     # initialize threads
     try:
         control_t = Thread(target=read_controller, args=(ps3,logger,))
-        imu_t = Thread(target=read_imu, args=(logger,))
+        imu_t = Thread(target=read_imu, args=(imu_dev,logger,))
         control_t.start()
         imu_t.start()
     except:
