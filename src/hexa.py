@@ -195,12 +195,13 @@ def init_controller(stdscr, logger):
 def read_controller(dev,logger):
     logger.debug('starting')
     global control
-    for event in dev.read_loop():
-        control.acquire()
-        logger.debug('acquired control')
-        pass    # do nothing for now
-        control.release()
-        logger.debug('released control')
+    while True:
+        for event in dev.read_loop():
+            control.acquire()
+            logger.debug('acquired control')
+            time.sleep(0.5) # do nothing for now
+            control.release()
+            logger.debug('released control')
 
 def read_imu(dev,logger):
     logger.debug('starting')
