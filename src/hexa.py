@@ -130,38 +130,6 @@ class IMU:
         self.deadband = 0.0
         self.calibrated = False
 
-def start_imu(stdscr, logger, poll_interval):
-    # set up IMU
-    SETTINGS_FILE = "RTIMUlib"
-    stdscr.addstr("settings file: " + SETTINGS_FILE + ".ini\n")
-    logger.info("settings file: " + SETTINGS_FILE + ".ini")
-    if not os.path.exists(SETTINGS_FILE + ".ini"):  # if no file, create one
-        stdscr.addstr("file not found, created settings file\n")
-        logger.info("file not found, created settings file")
-    settings = RTIMU.Settings(SETTINGS_FILE)
-    imu_dev = RTIMU.RTIMU(settings) # creating IMU object
-    stdscr.addstr("IMU Name: " + imu_dev.IMUName() + "\n")
-
-    if (not imu_dev.IMUInit()):
-        stdscr.addstr("failed to init IMU\n")
-        logger.info('failed to init IMU, closing thread')
-        sys.exit(1)
-    else:
-        stdscr.addstr("successfully initialized IMU\n")
-        logger.info('successfully initialized IMU')
-    stdscr.refresh()
-
-    imu_dev.setSlerpPower(0.02)
-    imu_dev.setGyroEnable(True)
-    imu_dev.setAccelEnable(True)
-    imu_dev.setCompassEnable(True)
-
-    #poll_interval = imu_dev.IMUGetPollInterval()
-    stdscr.addstr("poll interval: %d\n" % poll_interval)
-    stdscr.refresh()
-    logger.info('initialized imu unit: {}, poll_interval = {}'.format(imu_dev.IMUName(), poll_interval))
-    return imu_dev
-
 def init_controller(stdscr, logger):
 
     stdscr.addstr(1,0,"initializing controller...\n")
@@ -244,16 +212,17 @@ def read_imu(stdscr, logger, poll_interval):
 
     size = conf['accel_filter_num']
     accel_hist = np.zeros((3, size))
+
     while True:
         #logging.debug('running')
         if imu_dev.IMURead():
-            logger.debug('reading imu')
+            #logger.debug('reading imu')
 
             # read data from IMU
             data = imu_dev.getIMUData()
 
             imu.acquire()
-            logger.debug('acquired imu')
+            #logger.debug('acquired imu')
             imu.get().a_vel = data['gyro']
             imu.get().angle_fus = data['fusionPose']
             imu.get().angle_fus_q = data['fusionQPose']
@@ -277,13 +246,13 @@ def read_imu(stdscr, logger, poll_interval):
                     each[0] = imu.get().accel[i]
                     imu.get().accel_filtered[i] = np.sort(each)[int(size/2.0)]
                 imu.release()
-                logger.debug('released imu')
+                #logger.debug('released imu')
 
                 # update complementary filter
                 complementary_filter(logger)
             else:
                 imu.release()
-                logger.debug('released imu')
+                #logger.debug('released imu')
 
             time.sleep(poll_interval * 1.0/1000.0)
 
