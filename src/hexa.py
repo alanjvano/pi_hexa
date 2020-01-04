@@ -210,7 +210,6 @@ def read_controller(dev,logger):
 
 def read_imu(stdscr, logger, poll_interval):
     global imu
-    global poll_interval
     global conf
 
     # initialize imu
