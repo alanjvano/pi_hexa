@@ -347,7 +347,7 @@ def complementary_filter():
     imu.get().angle_comp += conf['gyro_sensitivity'] * np.asarray(tmp_gyro) + (1-conf['gyro_sensitivity']) * np.asarray(tmp_acc)
     imu.release()
 
-def main():
+def main(stdscr):
     global control
     global imu
     global conf
