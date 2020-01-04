@@ -144,7 +144,7 @@ def start_imu(stdscr, logger, poll_interval):
 
     if (not imu_dev.IMUInit()):
         stdscr.addstr("failed to init IMU\n")
-        logger.info('failed to init IMU')
+        logger.info('failed to init IMU, closing thread')
         sys.exit(1)
     else:
         stdscr.addstr("successfully initialized IMU\n")
@@ -210,9 +210,9 @@ def read_imu(stdscr, logger, poll_interval):
     global imu
     global conf
 
+    logger.debug('starting')
     # initialize imu
     dev = start_imu(stdscr, logger, poll_interval)
-    logger.debug('starting')
     logger.debug('imu info: {}'.format(dev.IMUName()))
 
     size = conf['accel_filter_num']
@@ -321,14 +321,6 @@ def complementary_filter():
     tmp_gyro = [0.0,0.0,0.0]
     tmp_acc = [0.0,0.0,0.0]
 
-    # init rgb
-    spi = busio.SPI(clock=board.SCK, MOSI=board.MOSI)
-    rgb = adafruit_tlc59711.TLC59711(spi)
-    rgb[0] = (65535, 0, 0)
-    rgb[1] = (65535, 0, 0)
-    rgb[2] = (0, 16000, 16000)
-    rgb[3] = (0, 16000, 16000)
-
     # gyroscope data returns only change in pos
     # p = integral(dp/dt)
     # because this is a discrete case, just sum change times time elapsed
@@ -377,6 +369,14 @@ def main(stdscr):
 
     time.sleep(0.5) # wait for imu to init...
     calibrate_imu(stdscr, conf['num_cal'], logger, conf['poll_int'])
+
+    # init rgb
+    spi = busio.SPI(clock=board.SCK, MOSI=board.MOSI)
+    rgb = adafruit_tlc59711.TLC59711(spi)
+    rgb[0] = (65535, 0, 0)
+    rgb[1] = (65535, 0, 0)
+    rgb[2] = (0, 16000, 16000)
+    rgb[3] = (0, 16000, 16000)
 
     while True:
         #update_scr(stdscr)
