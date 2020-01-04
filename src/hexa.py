@@ -25,6 +25,7 @@ global imu
 global poll_interval
 global conf
 global motors
+global stdscr
 
 # argument parser
 parser = argparse.ArgumentParser(description="hexa")
@@ -131,9 +132,10 @@ class IMU:
         self.deadband = 0.0
         self.calibrated = False
 
-def start_imu(stdscr, logger):
+def start_imu(logger):
     # set up IMU
     global poll_interval
+    global stdscr
     SETTINGS_FILE = "RTIMUlib"
     stdscr.addstr("setings file: " + SETTINGS_FILE + ".ini\n")
     if not os.path.exists(SETTINGS_FILE + ".ini"):  # if no file, create one
@@ -160,7 +162,9 @@ def start_imu(stdscr, logger):
     logger.info('initialized imu unit: {}, poll_interval = {}'.format(imu_dev.IMUName(), poll_interval))
     return imu_dev
 
-def init_controller(stdscr, logger):
+def init_controller(logger):
+    global stdscr
+
     stdscr.addstr(1,0,"initializing controller...\n")
     stdscr.refresh()
     conn = False
@@ -203,12 +207,16 @@ def read_controller(dev,logger):
             control.release()
             logger.debug('released control')
 
-def read_imu(dev,logger):
-    logger.debug('starting')
-    logger.debug('imu info: {}'.format(dev.IMUName()))
+def read_imu(logger):
     global imu
     global poll_interval
     global conf
+
+    # initialize imu
+    dev = start_imu(logger)
+    logger.debug('starting')
+    logger.debug('imu info: {}'.format(dev.IMUName()))
+
     size = conf['accel_filter_num']
     accel_hist = np.zeros(size)
     while True:
@@ -250,9 +258,11 @@ def read_imu(dev,logger):
 
             time.sleep(poll_interval * 1.0/1000.0)
 
-def calibrate_imu(num_cal, stdscr, logger):
+def calibrate_imu(num_cal, logger):
     global imu
     global poll_interval
+    globla stdscr
+
     stdscr.addstr('Calibrating IMU: {} measurements\n'.format(num_cal))
     stdscr.refresh()
     bias = [0.0, 0.0, 0.0]
@@ -293,7 +303,8 @@ def calibrate_imu(num_cal, stdscr, logger):
 
 # display hopefully useful info
 # things to add: bias, deadband, accel, vel, etc.
-def update_scr(stdscr):
+def update_scr():
+    global stdscr
     global imu
     stdscr.erase()
     imu.acquire()
@@ -341,10 +352,11 @@ def complementary_filter():
     imu.get().angle_comp += conf['gyro_sensitivity'] * np.asarray(tmp_gyro) + (1-conf['gyro_sensitivity']) * np.asarray(tmp_acc)
     imu.release()
 
-def main(stdscr):
+def main():
     global control
     global imu
     global conf
+    global stdscr
 
     # set up terminal output
     curses.use_default_colors()
@@ -354,17 +366,17 @@ def main(stdscr):
     logger = init_logging()
 
     # initialize controller
-    ps3 = init_controller(stdscr, logger)
+    ps3 = init_controller(logger)
     control = Spin_lock(Controller())
 
     # initialize imu
-    imu_dev = start_imu(stdscr, logger)
+    imu_dev = start_imu(logger)
     imu = Spin_lock(IMU())
 
     # initialize threads
     try:
         control_t = Thread(name='contr_thread', target=read_controller, args=(ps3,logger,))
-        imu_t = Thread(name='imu_thread', target=read_imu, args=(imu_dev,logger,))
+        imu_t = Thread(name='imu_thread', target=read_imu, args=(logger,))
         #control_t.setDaemon(true)
         #imu_t.setDaemon(true)
         control_t.start()
@@ -373,7 +385,7 @@ def main(stdscr):
         logger.debug('threads failed to start')
 
     time.sleep(0.5) # wait for imu to init...
-    calibrate_imu(conf['num_cal'], stdscr, logger)
+    calibrate_imu(conf['num_cal'], logger)
 
     while True:
         #update_scr(stdscr)
