@@ -1,113 +1,332 @@
-2020-01-03 21:07:26,909 [INFO] (MainThread     ) found controller: PLAYSTATION(R)3Conteroller-PANHAI - /dev/input/event1
-2020-01-03 21:07:29,496 [DEBUG] (contr_thread   ) starting
-2020-01-03 21:07:29,497 [INFO] (imu_thread     ) settings file: RTIMUlib.ini
-2020-01-03 21:07:29,498 [DEBUG] (contr_thread   ) acquired control
-2020-01-03 21:07:29,603 [INFO] (imu_thread     ) failed to init IMU
-2020-01-03 21:07:30,000 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,000 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,009 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,009 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,018 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,018 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,027 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,027 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,036 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,036 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,045 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,045 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,054 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,054 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,063 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,063 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,072 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,072 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,081 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,081 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,090 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,090 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,099 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,099 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,103 [DEBUG] (contr_thread   ) released control
-2020-01-03 21:07:30,104 [DEBUG] (contr_thread   ) acquired control
-2020-01-03 21:07:30,107 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,108 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,116 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,117 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,125 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,126 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,134 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,135 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,143 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,144 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,152 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,153 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,161 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,162 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,170 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,171 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,179 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,180 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,188 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,189 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,197 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,198 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,206 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,207 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,216 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,216 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,225 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,225 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,234 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,234 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,243 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,243 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,252 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,252 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,261 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,261 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,270 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,270 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,279 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,279 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,287 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,288 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,296 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,297 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,305 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,306 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,314 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,315 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,323 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,324 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,332 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,333 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,341 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,342 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,350 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,350 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,359 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,359 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,368 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,368 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,377 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,377 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,386 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,386 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,395 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,395 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,404 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,404 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,413 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,413 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,421 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,422 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,430 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,431 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,439 [DEBUG] (MainThread     ) acquired imu (calibrate)
-2020-01-03 21:07:30,440 [DEBUG] (MainThread     ) released imu (calibrate)
-2020-01-03 21:07:30,448 [DEBUG] (MainThread     ) acquired imu (set bias and deadband)
-2020-01-03 21:07:30,449 [DEBUG] (MainThread     ) released imu (set bias and deadband)
-2020-01-03 21:07:30,605 [DEBUG] (contr_thread   ) released control
-2020-01-03 21:07:30,606 [DEBUG] (contr_thread   ) acquired control
-2020-01-03 21:07:31,107 [DEBUG] (contr_thread   ) released control
-2020-01-03 21:07:32,452 [INFO] (MainThread     ) calibrated imu: deadband=[0.0, 0.0, 0.0], bias=[0.0, 0.0, 0.0]
+2020-01-03 22:01:31,672 [INFO] (MainThread     ) found controller: PLAYSTATION(R)3Conteroller-PANHAI - /dev/input/event1
+2020-01-03 22:01:34,645 [DEBUG] (contr_thread   ) starting
+2020-01-03 22:01:34,646 [DEBUG] (contr_thread   ) acquired control
+2020-01-03 22:01:34,647 [DEBUG] (imu_thread     ) starting
+2020-01-03 22:01:34,647 [INFO] (imu_thread     ) settings file: RTIMUlib.ini
+2020-01-03 22:01:35,015 [INFO] (imu_thread     ) successfully initialized IMU
+2020-01-03 22:01:35,016 [INFO] (imu_thread     ) initialized imu unit: MPU-9250, poll_interval = 4
+2020-01-03 22:01:35,023 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,023 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,024 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,034 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,035 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,035 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,047 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,047 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,048 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,058 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,059 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,059 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,070 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,071 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,071 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,082 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,083 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,083 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,095 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,095 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,095 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,106 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,107 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,107 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,118 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,119 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,119 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,130 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,131 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,132 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,143 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,143 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,144 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,147 [DEBUG] (contr_thread   ) released control
+2020-01-03 22:01:35,148 [DEBUG] (contr_thread   ) acquired control
+2020-01-03 22:01:35,149 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,154 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,155 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,156 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,156 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,167 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,167 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,178 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,179 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,179 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,187 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,188 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,198 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,199 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,199 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,207 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,208 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,218 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,219 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,219 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,227 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,228 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,239 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,239 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,240 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,247 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,248 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,259 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,259 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,260 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,267 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,268 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,279 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,279 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,280 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,287 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,288 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,299 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,299 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,300 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,307 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,308 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,319 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,319 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,320 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,327 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,328 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,339 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,339 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,340 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,347 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,348 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,359 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,359 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,360 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,368 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,368 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,379 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,379 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,380 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,388 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,388 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,399 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,399 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,400 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,408 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,408 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,419 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,419 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,420 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,428 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,428 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,439 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,439 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,440 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,448 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,448 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,459 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,460 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,460 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,468 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,468 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,479 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,479 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,480 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,488 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,488 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,499 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,500 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,500 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,508 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,508 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,519 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,520 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,520 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,528 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,528 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,539 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,540 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,540 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,548 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,548 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,559 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,560 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,560 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,568 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,568 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,579 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,580 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,580 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,588 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,589 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,600 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,600 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,601 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,609 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,609 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,620 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,621 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,621 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,645 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,646 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,646 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,647 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,648 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,653 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,653 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,654 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,655 [DEBUG] (contr_thread   ) released control
+2020-01-03 22:01:35,656 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,656 [DEBUG] (contr_thread   ) acquired control
+2020-01-03 22:01:35,656 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,659 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,660 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,660 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,665 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,666 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,676 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,677 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,677 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,683 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,683 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,684 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,685 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,686 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,689 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,689 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,690 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,694 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,695 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,696 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,696 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,697 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,702 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,703 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,703 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,705 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,705 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,708 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,709 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,709 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,714 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,715 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,725 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,726 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,726 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,732 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,732 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,733 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,734 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,735 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,738 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,738 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,739 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,743 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,744 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,745 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,746 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,746 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,752 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,752 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,753 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,754 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,755 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,758 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,758 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,759 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,763 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,764 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,765 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,765 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,766 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,774 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,774 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,785 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,785 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,786 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,794 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,794 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,805 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,805 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,806 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,814 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,814 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,825 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,825 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,826 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,834 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,834 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,845 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,845 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,846 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,854 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,854 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,865 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,865 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,866 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,874 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,874 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,885 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,885 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,886 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,910 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,910 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,911 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,911 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,912 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,917 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,918 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,918 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,920 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,920 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,923 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,924 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,924 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,929 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,930 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,930 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,931 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,931 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,937 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,937 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,938 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,939 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,940 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,943 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,943 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,944 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,948 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,949 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,949 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,950 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,951 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,956 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,956 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,957 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,959 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,959 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,962 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,962 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,963 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,968 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,969 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,979 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,980 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,981 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,986 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,986 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,987 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,988 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,989 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,992 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,992 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:35,993 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:35,997 [DEBUG] (MainThread     ) acquired imu (calibrate)
+2020-01-03 22:01:35,998 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:35,999 [DEBUG] (MainThread     ) released imu (calibrate)
+2020-01-03 22:01:35,999 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:36,000 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:36,005 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:36,006 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:36,006 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:36,008 [DEBUG] (MainThread     ) acquired imu (set bias and deadband)
+2020-01-03 22:01:36,008 [DEBUG] (MainThread     ) released imu (set bias and deadband)
+2020-01-03 22:01:36,011 [DEBUG] (imu_thread     ) reading imu
+2020-01-03 22:01:36,012 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:36,014 [DEBUG] (imu_thread     ) released imu
+2020-01-03 22:01:36,015 [DEBUG] (imu_thread     ) acquired imu
+2020-01-03 22:01:36,158 [DEBUG] (contr_thread   ) released control
+2020-01-03 22:01:38,012 [INFO] (MainThread     ) calibrated imu: deadband=[0.0027405419386923313, 0.003732506185770035, 0.0033508818596601486], bias=[0.0005075377505272627, -0.0019687097519636154, -0.00048319559544324876]

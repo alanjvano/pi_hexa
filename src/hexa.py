@@ -243,7 +243,7 @@ def read_imu(stdscr, logger, poll_interval):
     logger.info('initialized imu unit: {}, poll_interval = {}'.format(imu_dev.IMUName(), poll_interval))
 
     size = conf['accel_filter_num']
-    accel_hist = np.zeros(3, size)
+    accel_hist = np.zeros((3, size))
     while True:
         #logging.debug('running')
         if imu_dev.IMURead():
@@ -272,7 +272,7 @@ def read_imu(stdscr, logger, poll_interval):
                         imu.get().a_vel_filtered[i] = each - imu.get().bias[i]
 
                 # use median filter for acceleromater readings to help with spikes
-                for i, each in enumerate(accel_hist)
+                for i, each in enumerate(accel_hist):
                     each = np.roll(each, 1)
                     each[0] = imu.get().accel[i]
                     imu.get().accel_filtered[i] = np.sort(each)[int(size/2.0)]
@@ -280,7 +280,7 @@ def read_imu(stdscr, logger, poll_interval):
                 logger.debug('released imu')
 
                 # update complementary filter
-                complementary_filter()
+                complementary_filter(logger)
             else:
                 imu.release()
                 logger.debug('released imu')
@@ -345,21 +345,21 @@ def update_scr(stdscr):
     logger.debug('released imu')
     stdscr.refresh()
 
-def complementary_filter():
+def complementary_filter(logger):
     global imu
     global conf
 
-    tmp_gyro = [0.0,0.0,0.0]
-    tmp_acc = [0.0,0.0,0.0]
+    tmp_gyro = np.array([0.0,0.0,0.0])
+    tmp_acc = np.array([0.0,0.0,0.0])
 
     # gyroscope data returns only change in pos
     # p = integral(dp/dt)
     # because this is a discrete case, just sum change times time elapsed
     imu.acquire()
     logger.debug('acquired imu')
-    delta_t = (imu.get().time_cur - imu.get().time_init) / 10**6    # convert from microseconds to seconds
+    delta_t = (imu.get().time_cur - imu.get().time_prev) / 10**6    # convert from microseconds to seconds
     for i, each in enumerate(tmp_gyro):
-        each = imu.get().a_vel * delta_t
+        each = imu.get().a_vel[i] * delta_t
 
     # based on Tilt Sensing Using a Three-Axis Accelerometer by Mark Pedley
     # (http://cache.freescale.com/files/sensors/doc/app_note/AN3461.pdf?fpsp=1)
