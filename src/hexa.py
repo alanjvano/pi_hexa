@@ -243,7 +243,7 @@ def read_imu(stdscr, logger, poll_interval):
     logger.info('initialized imu unit: {}, poll_interval = {}'.format(imu_dev.IMUName(), poll_interval))
 
     size = conf['accel_filter_num']
-    accel_hist = np.zeros(size)
+    accel_hist = np.zeros(3, size)
     while True:
         #logging.debug('running')
         if imu_dev.IMURead():
@@ -272,9 +272,10 @@ def read_imu(stdscr, logger, poll_interval):
                         imu.get().a_vel_filtered[i] = each - imu.get().bias[i]
 
                 # use median filter for acceleromater readings to help with spikes
-                accel_hist = np.roll(accel_hist, 1)
-                accel_hist[0] = imu.get().accel
-                imu.get().accel_filtered = np.sort(accel_hist)[int(size/2.0)]
+                for i, each in enumerate(accel_hist)
+                    each = np.roll(each, 1)
+                    each[0] = imu.get().accel[i]
+                    imu.get().accel_filtered[i] = np.sort(each)[int(size/2.0)]
                 imu.release()
                 logger.debug('released imu')
 
