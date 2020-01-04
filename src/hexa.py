@@ -275,11 +275,13 @@ def read_imu(stdscr, logger, poll_interval):
                 accel_hist[0] = imu.get().accel
                 imu.get().accel_filtered = np.sort(accel_hist)[int(size/2.0)]
                 imu.release()
+                logger.debug('released imu')
 
                 # update complementary filter
                 complementary_filter()
             else:
                 imu.release()
+                logger.debug('released imu')
 
             time.sleep(poll_interval * 1.0/1000.0)
 
