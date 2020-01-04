@@ -304,8 +304,8 @@ def update_scr(stdscr):
     stdscr.erase()
     imu.acquire()
     #logger.debug('acquired imu')
-    stdscr.addstr(1,0,'gyro    - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().a_vel)))
-    stdscr.addstr(2,0,'accel   - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(imu.get().accel))
+    stdscr.addstr(1,0,'gyro    - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().a_vel_filtered)))
+    stdscr.addstr(2,0,'accel   - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(imu.get().accel_filtered))
     stdscr.addstr(3,0,'fusion  - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_fus)))
     stdscr.addstr(4,0,'fusionq - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_fus_q)))
     stdscr.addstr(5,0,'complem - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_comp)))
@@ -332,11 +332,11 @@ def complementary_filter(logger):
 
     # based on Tilt Sensing Using a Three-Axis Accelerometer by Mark Pedley
     # (http://cache.freescale.com/files/sensors/doc/app_note/AN3461.pdf?fpsp=1)
-    tmp_acc[0] = math.atan(imu.get().accel[1]/imu.get().accel[2])
-    tmp_acc[1] = math.atan(-1*imu.get().accel[0]/(imu.get().accel[1]**2+imu.get().accel[2]**2)**0.5)
+    tmp_acc[0] = math.atan(imu.get().accel_filtered[1]/imu.get().accel_filtered[2])
+    tmp_acc[1] = math.atan(-1 * imu.get().accel_filtered[0] / (( (imu.get().accel_filtered[1]**2) + (imu.get().accel_filtered[2]**2))**0.5) )
 
     # Note: only pitch and roll are valid from this estimation (for yaw use compass)
-    imu.get().angle_comp += conf['gyro_sensitivity'] * np.asarray(tmp_gyro) + (1-conf['gyro_sensitivity']) * np.asarray(tmp_acc)
+    imu.get().angle_comp += conf['gyro_sensitivity'] * tmp_gyro + (1-conf['gyro_sensitivity']) * tmp_acc
     imu.release()
 
 def main(stdscr):
