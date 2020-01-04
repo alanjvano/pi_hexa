@@ -379,9 +379,8 @@ def main(stdscr):
     rgb[3] = (0, 16000, 16000)
 
     while True:
-        #update_scr(stdscr)
-        pass
-        #time.sleep(0.1)
+        update_scr(stdscr)
+        time.sleep(0.1)
 
 if __name__ == "__main__":
     curses.wrapper(main)
