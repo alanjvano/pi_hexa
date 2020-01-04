@@ -365,12 +365,9 @@ def main():
     # init logger
     logger = init_logging()
 
-    # initialize controller
+    # initialize controller and imu
     ps3 = init_controller(logger)
     control = Spin_lock(Controller())
-
-    # initialize imu
-    imu_dev = start_imu(logger)
     imu = Spin_lock(IMU())
 
     # initialize threads
