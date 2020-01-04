@@ -279,7 +279,7 @@ def calibrate_imu(stdscr, num_cal, logger, poll_interval):
         logger.debug('released imu (calibrate)')
 
         # wait for imu readings to update
-        time.sleep(2.0 * poll_interval * 1.0/1000.0)
+        time.sleep(10.0 * poll_interval * 1.0/1000.0)
 
     bias[:] = [k / num_cal for k in bias]
     deadband[:] = [(max[m] - min[m]) for m in range(len(min))]
