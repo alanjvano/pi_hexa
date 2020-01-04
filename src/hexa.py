@@ -208,7 +208,7 @@ def read_controller(dev,logger):
             control.release()
             logger.debug('released control')
 
-def read_imu(logger):
+def read_imu(stdscr, logger, poll_interval):
     global imu
     global poll_interval
     global conf
@@ -371,7 +371,7 @@ def main(stdscr):
     # initialize threads
     try:
         control_t = Thread(name='contr_thread', target=read_controller, args=(ps3,logger,))
-        imu_t = Thread(name='imu_thread', target=read_imu, args=(stdscr,logger,))
+        imu_t = Thread(name='imu_thread', target=read_imu, args=(stdscr,logger, conf['contr_int']))
         #control_t.setDaemon(true)
         #imu_t.setDaemon(true)
         control_t.start()

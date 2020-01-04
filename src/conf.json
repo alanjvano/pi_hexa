@@ -2,5 +2,6 @@
 	"motors":	[0,1,2,8,14,15],
 	"gyro_sensitivity": 0.98,
 	"accel_filter_num": 11,
-	"num_cal": 50
+	"num_cal": 50,
+	"contr_int": 4
 }
