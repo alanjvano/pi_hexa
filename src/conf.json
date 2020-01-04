@@ -3,5 +3,5 @@
 	"gyro_sensitivity": 0.98,
 	"accel_filter_num": 11,
 	"num_cal": 50,
-	"contr_int": 4
+	"poll_int": 4
 }

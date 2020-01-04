@@ -22,7 +22,6 @@ import logging
 # init global variables
 global control
 global imu
-global poll_interval
 global conf
 global motors
 
@@ -131,9 +130,8 @@ class IMU:
         self.deadband = 0.0
         self.calibrated = False
 
-def start_imu(stdscr, logger):
+def start_imu(stdscr, logger, poll_interval):
     # set up IMU
-    global poll_interval
     SETTINGS_FILE = "RTIMUlib"
     stdscr.addstr("settings file: " + SETTINGS_FILE + ".ini\n")
     logger.info("settings file: " + SETTINGS_FILE + ".ini")
@@ -158,7 +156,7 @@ def start_imu(stdscr, logger):
     imu_dev.setAccelEnable(True)
     imu_dev.setCompassEnable(True)
 
-    poll_interval = imu_dev.IMUGetPollInterval()
+    #poll_interval = imu_dev.IMUGetPollInterval()
     stdscr.addstr("poll interval: %d\n" % poll_interval)
     stdscr.refresh()
     logger.info('initialized imu unit: {}, poll_interval = {}'.format(imu_dev.IMUName(), poll_interval))
@@ -213,7 +211,7 @@ def read_imu(stdscr, logger, poll_interval):
     global conf
 
     # initialize imu
-    dev = start_imu(stdscr, logger)
+    dev = start_imu(stdscr, logger, poll_interval)
     logger.debug('starting')
     logger.debug('imu info: {}'.format(dev.IMUName()))
 
@@ -258,9 +256,8 @@ def read_imu(stdscr, logger, poll_interval):
 
             time.sleep(poll_interval * 1.0/1000.0)
 
-def calibrate_imu(stdscr, num_cal, logger):
+def calibrate_imu(stdscr, num_cal, logger, poll_interval):
     global imu
-    global poll_interval
 
     stdscr.addstr('Calibrating IMU: {} measurements\n'.format(num_cal))
     stdscr.refresh()
@@ -370,7 +367,7 @@ def main(stdscr):
     # initialize threads
     try:
         control_t = Thread(name='contr_thread', target=read_controller, args=(ps3,logger,))
-        imu_t = Thread(name='imu_thread', target=read_imu, args=(stdscr,logger, conf['contr_int']))
+        imu_t = Thread(name='imu_thread', target=read_imu, args=(stdscr,logger, conf['poll_int']))
         #control_t.setDaemon(true)
         #imu_t.setDaemon(true)
         control_t.start()
@@ -379,7 +376,7 @@ def main(stdscr):
         logger.debug('threads failed to start')
 
     time.sleep(0.5) # wait for imu to init...
-    calibrate_imu(stdscr, conf['num_cal'], logger)
+    calibrate_imu(stdscr, conf['num_cal'], logger, conf['poll_int'])
 
     while True:
         #update_scr(stdscr)
