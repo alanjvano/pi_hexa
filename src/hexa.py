@@ -135,18 +135,22 @@ def start_imu(stdscr, logger):
     # set up IMU
     global poll_interval
     SETTINGS_FILE = "RTIMUlib"
-    stdscr.addstr("setings file: " + SETTINGS_FILE + ".ini\n")
+    stdscr.addstr("settings file: " + SETTINGS_FILE + ".ini\n")
+    logger.info("settings file: " + SETTINGS_FILE + ".ini")
     if not os.path.exists(SETTINGS_FILE + ".ini"):  # if no file, create one
         stdscr.addstr("file not found, created settings file\n")
+        logger.info("file not found, created settings file")
     settings = RTIMU.Settings(SETTINGS_FILE)
     imu_dev = RTIMU.RTIMU(settings) # creating IMU object
     stdscr.addstr("IMU Name: " + imu_dev.IMUName() + "\n")
 
     if (not imu_dev.IMUInit()):
         stdscr.addstr("failed to init IMU\n")
+        logger.info('failed to init IMU')
         sys.exit(1)
     else:
         stdscr.addstr("successfully initialized IMU\n")
+        logger.info('successfully initialized IMU')
     stdscr.refresh()
 
     imu_dev.setSlerpPower(0.02)
