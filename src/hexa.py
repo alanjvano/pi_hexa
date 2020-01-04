@@ -325,7 +325,7 @@ def complementary_filter(logger):
     # p = integral(dp/dt)
     # because this is a discrete case, just sum change times time elapsed
     imu.acquire()
-    logger.debug('acquired imu')
+    #logger.debug('acquired imu')
     delta_t = (imu.get().time_cur - imu.get().time_prev) / 10**6    # convert from microseconds to seconds
     for i, each in enumerate(tmp_gyro):
         each = imu.get().a_vel[i] * delta_t
