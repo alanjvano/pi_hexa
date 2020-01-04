@@ -114,16 +114,16 @@ class Controller:
 
 class IMU:
     def __init__(self):
-        self.accel = [0.0,0.0,0.0]
-        self.accel_filtered = [0.0,0.0,0.0]
-        self.vel = [0.0,0.0,0.0]
-        self.pos = [0.0,0.0,0.0]
-        self.a_vel = [0.0,0.0,0.0]
-        self.a_vel_filtered = [0.0,0.0,0.0]
-        self.angle_comp = [0.0,0.0,0.0]
-        self.angle_comp = [0.0,0.0,0.0]
-        self.angle_fus = [0.0,0.0,0.0]
-        self.angle_fus_q = [0.0,0.0,0.0]
+        self.accel = np.array([0.0,0.0,0.0])
+        self.accel_filtered = np.array([0.0,0.0,0.0])
+        self.vel = np.array([0.0,0.0,0.0])
+        self.pos = np.array([0.0,0.0,0.0])
+        self.a_vel = np.array([0.0,0.0,0.0])
+        self.a_vel_filtered = np.array([0.0,0.0,0.0])
+        self.angle_comp = np.array([0.0,0.0,0.0])
+        self.angle_comp = np.array([0.0,0.0,0.0])
+        self.angle_fus = np.array([0.0,0.0,0.0])
+        self.angle_fus_q = np.array([0.0,0.0,0.0])
         self.time_prev = 0  # microseconds
         self.time_cur = 0
         self.bias = 0.0
@@ -265,10 +265,11 @@ def read_imu(stdscr, logger, poll_interval):
 
             if imu.get().calibrated:
                 # check deadband and account for bias
-                if ((imu.get().a_vel < imu.get().bias + imu.get().deadband) or (imu.get().a_vel > imu.get().bias - imu.get().deadband)):
-                    imu.get().a_vel_filtered = 0.0
-                else:
-                    imu.get().a_vel_filtered = imu.get().a_vel - imu.get().bias
+                for i, each in enumerate(imu.get().a_vel):
+                    if ((each < (imu.get().bias[i] + imu.get().deadband[i])) or (each > (imu.get().bias[i] - imu.get().deadband[i]))):
+                        imu.get().a_vel_filtered[i] = 0.0
+                    else:
+                        imu.get().a_vel_filtered[i] = each - imu.get().bias[i]
 
                 # use median filter for acceleromater readings to help with spikes
                 accel_hist = np.roll(accel_hist, 1)
