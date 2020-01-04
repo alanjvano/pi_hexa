@@ -303,7 +303,7 @@ def update_scr(stdscr):
     global imu
     stdscr.erase()
     imu.acquire()
-    logger.debug('acquired imu')
+    #logger.debug('acquired imu')
     stdscr.addstr(1,0,'gyro    - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().a_vel)))
     stdscr.addstr(2,0,'accel   - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(imu.get().accel))
     stdscr.addstr(3,0,'fusion  - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_fus)))
@@ -311,7 +311,7 @@ def update_scr(stdscr):
     stdscr.addstr(5,0,'complem - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_comp)))
     stdscr.addstr(6,0,'time - {}'.format(imu.get().time_cur))
     imu.release()
-    logger.debug('released imu')
+    #logger.debug('released imu')
     stdscr.refresh()
 
 def complementary_filter(logger):
