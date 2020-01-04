@@ -261,7 +261,7 @@ def read_imu(logger):
 def calibrate_imu(num_cal, logger):
     global imu
     global poll_interval
-    globla stdscr
+    global stdscr
 
     stdscr.addstr('Calibrating IMU: {} measurements\n'.format(num_cal))
     stdscr.refresh()
