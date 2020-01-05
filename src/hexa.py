@@ -162,9 +162,9 @@ def read_controller(dev,logger):
     global control
 
     ps3_codes = {
-        304: ['x'],
-        305: ['o'],
-        315: ['start']
+        304: 'x',
+        305: 'o',
+        315: 'start'
     }
 
     while True:
