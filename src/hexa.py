@@ -166,13 +166,22 @@ def init_controller(stdscr, logger):
 def read_controller(dev,logger):
     logger.debug('starting')
     global control
+
+    def switch_ctr(arg):
+        switch = {
+            304: "x",
+            305: "o"
+        }
+        return switch.get(arg)
+
     while True:
         for event in dev.read_loop():
             control.acquire()
-            logger.debug('acquired control')
-            time.sleep(0.5) # do nothing for now
+            #logger.debug('acquired control')
+            control.get().switch_ctr(event.code) = bool(event.value)
+
             control.release()
-            logger.debug('released control')
+            #logger.debug('released control')
 
 def read_imu(stdscr, logger, poll_interval):
     global imu
@@ -301,16 +310,23 @@ def calibrate_imu(stdscr, num_cal, logger, poll_interval):
 # things to add: bias, deadband, accel, vel, etc.
 def update_scr(stdscr):
     global imu
+    global control
     stdscr.erase()
     imu.acquire()
+    control.acquire()
     #logger.debug('acquired imu')
+
     stdscr.addstr(1,0,'gyro    - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().a_vel_filtered)))
     stdscr.addstr(2,0,'accel   - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(imu.get().accel_filtered))
     stdscr.addstr(3,0,'fusion  - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_fus)))
     stdscr.addstr(4,0,'fusionq - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_fus_q)))
-    stdscr.addstr(5,0,'complem - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_comp)))
+    stdscr.addstr(5,0,'comp    - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_comp)))
     stdscr.addstr(6,0,'time - {}'.format(imu.get().time_cur))
+    stdscr.addstr(7,0,'x - {}   0 - {}'.format(control.get().x, control.get().o))
+    stdscr.addstr()
+
     imu.release()
+    control.release()
     #logger.debug('released imu')
     stdscr.refresh()
 
