@@ -98,12 +98,14 @@ class Controller:
             'r_bump': False,
             'l_joy': False,
             'r_joy': False,
+            'l_trig_d': False,
+            'r_trig_d': False,
             'left_x': 0.0,
             'left_y': 0.0,
             'right_x': 0.0,
             'right_y': 0.0,
-            'l_trig': 0.0,
-            'r_trig': 0.0
+            'l_trig_a': 0.0,
+            'r_trig_a': 0.0
         }
 
 class IMU:
@@ -164,17 +166,59 @@ def read_controller(dev,logger):
     ps3_codes = {
         304: 'x',
         305: 'o',
-        315: 'start'
+        307: 'tri',
+        308: 'sqr',
+        544: 'up',
+        545: 'down',
+        546: 'left',
+        547: 'right',
+        315: 'start',
+        314: 'sel',
+        316: 'home',
+        310: 'l_bump',
+        311: 'r_bump',
+        317: 'l_joy',
+        318: 'r_joy',
+        312: 'l_trig_d',
+        313: 'r_trig_d',
+        0: 'left_x',
+        1: 'left_y',
+        3: 'right_x',
+        4: 'right_y',
+        2: 'l_trig_a',
+        5: 'r_trig_a'
     }
 
     while True:
-        for event in dev.read_loop():
-            control.acquire()
-            #logger.debug('acquired control')
-            if event.code != 0 and event.code != 4:
-                control.get().state[ps3_codes[event.code]] = bool(event.value)
-            control.release()
-            #logger.debug('released control')
+        try:
+            for event in dev.read_loop():
+                control.acquire()
+                #logger.debug('acquired control')
+
+                # handle button presses
+                if event.type == 1:
+                    if event.code != 0 and event.code != 4:
+                        control.get().state[ps3_codes[event.code]] = bool(event.value)
+
+                # handle analog inputs
+                if event.type == 3:
+                    control.get().state[ps3_codes[event.code]] = event.value
+
+                control.release()
+                #logger.debug('released control')
+
+        # in case the controller goes to asleep or disconnects try to reconnect
+        except:
+            logger.info('controller disconnected')
+            conn = False
+            while not conn:
+                devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
+                for device in devices:
+                    if device.name == 'PLAYSTATION(R)3Conteroller-PANHAI':
+                        ps3 = device.path
+                        dev = evdev.InputDevice(ps3)
+                        logger.info('reconnected to controller: {} - {}'.format(device.name, device.path))
+                        conn = True
 
 def read_imu(stdscr, logger, poll_interval):
     global imu
@@ -315,7 +359,9 @@ def update_scr(stdscr):
     stdscr.addstr(4,0,'fusionq - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_fus_q)))
     stdscr.addstr(5,0,'comp    - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_comp)))
     stdscr.addstr(6,0,'time - {}'.format(imu.get().time_cur))
-    stdscr.addstr(7,0,'x - {}   0 - {}'.format(control.get().state['x'], control.get().state['o']))
+    stdscr.addstr(7,0,'X: {}  O: {}  Tri: {}  Sqr: {}   l: {}  r: {}  u: {}  d: {}'.format(control.get().state['x'],
+        control.get().state['o'], control.get().state['tri'], control.get().state['sqr'],
+        control.get().state['left'], control.get().state['right'], control.get().state['up'], control.get().state['down']))
 
     imu.release()
     control.release()
