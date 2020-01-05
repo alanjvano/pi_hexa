@@ -316,7 +316,6 @@ def update_scr(stdscr):
     stdscr.addstr(5,0,'comp    - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_comp)))
     stdscr.addstr(6,0,'time - {}'.format(imu.get().time_cur))
     stdscr.addstr(7,0,'x - {}   0 - {}'.format(control.get().state['x'], control.get().state['o']))
-    stdscr.addstr()
 
     imu.release()
     control.release()
