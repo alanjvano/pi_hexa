@@ -168,7 +168,7 @@ def read_controller(dev,logger):
         for event in dev.read_loop():
             control.acquire()
             #logger.debug('acquired control')
-            control.get().ps3_codes(event.code) = bool(event.value)
+            control.get().ps3_codes[event.code] = bool(event.value)
 
             control.release()
             #logger.debug('released control')
