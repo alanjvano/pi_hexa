@@ -163,7 +163,8 @@ def read_controller(dev,logger):
 
     ps3_codes = {
         304: ['x'],
-        305: ['o']
+        305: ['o'],
+        315: ['start']
     }
 
     while True:
