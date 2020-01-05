@@ -82,27 +82,29 @@ class Spin_lock:
 
 class Controller:
     def __init__(self):
-        self.x = False
-        self.o = False
-        self.tri = False
-        self.sqr = False
-        self.up = False
-        self.down = False
-        self.left = False
-        self.right = False
-        self.start = False
-        self.select = False
-        self.home = False
-        self.l_bump = False
-        self.r_bump = False
-        self.l_joy = False
-        self.r_joy = False
-        self.left_x = 0.0
-        self.left_y = 0.0
-        self.right_x = 0.0
-        self.right_y = 0.0
-        self.l_trig = 0.0
-        self.r_trig = 0.0
+        self.state = {
+            'x': False,
+            'o': False,
+            'tri': False,
+            'sqr': False,
+            'up': False,
+            'down': False,
+            'left': False,
+            'right': False,
+            'start': False,
+            'sel': False,
+            'home': False,
+            'l_bump': False,
+            'r_bump': False,
+            'l_joy': False,
+            'r_joy': False,
+            'left_x': 0.0,
+            'left_y': 0.0,
+            'right_x': 0.0,
+            'right_y': 0.0,
+            'l_trig': 0.0,
+            'r_trig': 0.0
+        }
 
 class IMU:
     def __init__(self):
@@ -161,14 +163,14 @@ def read_controller(dev,logger):
 
     ps3_codes = {
         304: ['x'],
-        305: 'o',
+        305: ['o']
     }
 
     while True:
         for event in dev.read_loop():
             control.acquire()
             #logger.debug('acquired control')
-            control.get().ps3_codes[event.code] = bool(event.value)
+            control.get().state[ps3_codes[event.code]] = bool(event.value)
 
             control.release()
             #logger.debug('released control')
@@ -312,7 +314,7 @@ def update_scr(stdscr):
     stdscr.addstr(4,0,'fusionq - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_fus_q)))
     stdscr.addstr(5,0,'comp    - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_comp)))
     stdscr.addstr(6,0,'time - {}'.format(imu.get().time_cur))
-    stdscr.addstr(7,0,'x - {}   0 - {}'.format(control.get().x, control.get().o))
+    stdscr.addstr(7,0,'x - {}   0 - {}'.format(control.get().state['x'], control.get().state['o']))
     stdscr.addstr()
 
     imu.release()
