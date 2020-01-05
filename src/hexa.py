@@ -42,14 +42,6 @@ motors = conf['motors']
 # set up line pointer for curses interface
 #global curses_line 0
 
-#define input codes for PS3 controller
-ps3_codes = {'l_but':295, 'u_but':292, 'r_but':293, 'd_but':294,
-        'x_but':302, 's_but':303, 't_but':300, 'c_but':301,
-        'l1':298, 'l2':296, 'r1':299, 'r2':297,
-        'start':291, 'sel':288,
-        'l_joy':289, 'r_joy':290}
-#Note: type 3: analog, type 1: key press
-
 # initialize handler for logging to file
 def init_logging():
     # init logging info
@@ -167,18 +159,16 @@ def read_controller(dev,logger):
     logger.debug('starting')
     global control
 
-    def switch_ctr(arg):
-        switch = {
-            304: "x",
-            305: "o"
-        }
-        return switch.get(arg)
+    ps3_codes = {
+        304: ['x'],
+        305: 'o',
+    }
 
     while True:
         for event in dev.read_loop():
             control.acquire()
             #logger.debug('acquired control')
-            control.get().switch_ctr(event.code) = bool(event.value)
+            control.get().ps3_codes(event.code) = bool(event.value)
 
             control.release()
             #logger.debug('released control')
