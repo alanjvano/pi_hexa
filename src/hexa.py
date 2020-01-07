@@ -404,12 +404,14 @@ def update_scr(stdscr):
     stdscr.addstr(4,0,'fusion           - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(np.degrees(imu.get().angle_fus)))
     stdscr.addstr(5,0,'fusionq          - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(np.degrees(imu.get().angle_fus_q)))
     stdscr.addstr(6,0,'complementary    - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(np.degrees(imu.get().angle_comp)))
-    stdscr.addstr(7,0,'time - {}'.format(imu.get().time_cur))
-    stdscr.addstr(8,0,'X: {}  O: {}  Tri: {}  Sqr: {}'.format(control.get().state['x'],
+    stdscr.addstr(7,0,'bias_gyro        - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().g_bias))
+    stdscr.addstr(8,0,'bias_accel       - {0[0]:^6.5f}  {0[1]:^6.5f}  {0[2]:^6.5f}'.format(imu.get().a_bias))
+    stdscr.addstr(9,0,'time - {}'.format(imu.get().time_cur))
+    stdscr.addstr(10,0,'X: {}  O: {}  Tri: {}  Sqr: {}'.format(control.get().state['x'],
         control.get().state['o'], control.get().state['tri'], control.get().state['sqr']))
-    stdscr.addstr(9,0,'l: {}  r: {}  u: {}  d: {}'.format(control.get().state['left'],
+    stdscr.addstr(11,0,'l: {}  r: {}  u: {}  d: {}'.format(control.get().state['left'],
         control.get().state['right'], control.get().state['up'], control.get().state['down']))
-    stdscr.addstr(10,0,'bias_gyro        - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().g_bias))
+
 
     imu.lock.release()
     control.lock.release()
