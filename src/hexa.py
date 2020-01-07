@@ -311,7 +311,7 @@ def read_imu(stdscr, logger, poll_interval):
                     logger.debug('accel_hist update: {}'.format(accel_hist))
                     imu.get().accel_filtered[i] = np.sort(each)[int(size/2.0)]
                     logger.debug('accel_hist after: {}'.format(accel_hist))
-                    logger.debyg('media value: {}'.format(np.sort(each)[int(size/2.0)]))
+                    logger.debug('media value: {}'.format(np.sort(each)[int(size/2.0)]))
                 imu.lock.release()
                 #logger.debug('released imu')
 
