@@ -359,9 +359,10 @@ def update_scr(stdscr):
     stdscr.addstr(4,0,'fusionq - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_fus_q)))
     stdscr.addstr(5,0,'comp    - x: {0[0]:.2f}  y: {0[1]:.2f}  z: {0[2]:.2f}'.format(np.degrees(imu.get().angle_comp)))
     stdscr.addstr(6,0,'time - {}'.format(imu.get().time_cur))
-    stdscr.addstr(7,0,'X: {}  O: {}  Tri: {}  Sqr: {}   l: {}  r: {}  u: {}  d: {}'.format(control.get().state['x'],
-        control.get().state['o'], control.get().state['tri'], control.get().state['sqr'],
-        control.get().state['left'], control.get().state['right'], control.get().state['up'], control.get().state['down']))
+    stdscr.addstr(7,0,'X: {}  O: {}  Tri: {}  Sqr: {}'.format(control.get().state['x'],
+        control.get().state['o'], control.get().state['tri'], control.get().state['sqr']))
+    stdscr.addstr(8,0,'l: {}  r: {}  u: {}  d: {}'.format(control.get().state['left'],
+        control.get().state['right'], control.get().state['up'], control.get().state['down']))
 
     imu.release()
     control.release()
