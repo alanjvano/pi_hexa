@@ -11,7 +11,7 @@ import numpy as np
 import curses
 import warnings
 import evdev
-from threading import Thread
+from threading import Thread, Lock
 import board
 import busio
 import digitalio
@@ -62,17 +62,21 @@ def init_logging():
 
 # class used for interacting with shared memory
 class Spin_lock:
+
     def __init__(self, a):
         self.resource = a
-        self.locked = False
+        self.lock = Lock()
+        #self.locked = False
 
     def acquire(self):
-        while (self.locked):
-            pass
-        self.locked = True
+        self.lock.acquire()
+    #    while (self.locked):
+    #        pass
+    #    self.locked = True
 
     def release(self):
-        self.locked = False
+        self.lock.release()
+    #    self.locked = False
 
     def set(self, val):
         self.resource = val
@@ -120,10 +124,12 @@ class IMU:
         self.angle_comp = np.array([0.0,0.0,0.0])
         self.angle_fus = np.array([0.0,0.0,0.0])
         self.angle_fus_q = np.array([0.0,0.0,0.0])
+        self.g_bias = np.array([0.0,0.0,0.0])
+        self.a_bias = np.array([0.0,0.0,0.0])
         self.time_prev = 0  # microseconds
         self.time_cur = 0
-        self.bias = 0.0
-        self.deadband = 0.0
+        self.g_deadband = 0.0
+        self.a_deadband = 0.0
         self.calibrated = False
 
 def init_controller(stdscr, logger):
@@ -148,10 +154,12 @@ def init_controller(stdscr, logger):
                 stdscr.refresh()
                 conn = True
 
+    stdscr.addstr("\nPress START\n")
+    stdscr.refresh()
     #loop until start button is pressed
     for event in ps3.read_loop():
-        stdscr.addstr(str(event)+'\n')
-        stdscr.refresh()
+        #stdscr.addstr(str(event)+'\n')
+        #stdscr.refresh()
         if event.type == 1 and event.code == 315 and event.value == 1:
             stdscr.erase()
             stdscr.addstr('starting\n')
@@ -192,7 +200,7 @@ def read_controller(dev,logger):
     while True:
         try:
             for event in dev.read_loop():
-                control.acquire()
+                control.lock.acquire()
                 #logger.debug('acquired control')
 
                 # handle button presses
@@ -204,7 +212,7 @@ def read_controller(dev,logger):
                 if event.type == 3:
                     control.get().state[ps3_codes[event.code]] = event.value
 
-                control.release()
+                control.lock.release()
                 #logger.debug('released control')
 
         # in case the controller goes to asleep or disconnects try to reconnect
@@ -267,7 +275,7 @@ def read_imu(stdscr, logger, poll_interval):
             # read data from IMU
             data = imu_dev.getIMUData()
 
-            imu.acquire()
+            imu.lock.acquire()
             #logger.debug('acquired imu')
             imu.get().a_vel = data['gyro']
             imu.get().angle_fus = data['fusionPose']
@@ -281,23 +289,31 @@ def read_imu(stdscr, logger, poll_interval):
             if imu.get().calibrated:
                 # check deadband and account for bias
                 for i, each in enumerate(imu.get().a_vel):
-                    if ((each < (imu.get().bias[i] + imu.get().deadband[i])) or (each > (imu.get().bias[i] - imu.get().deadband[i]))):
+                    if ((each < (imu.get().g_bias[i] + imu.get().g_deadband[i])) and (each > (imu.get().g_bias[i] - imu.get().g_deadband[i]))):
+
                         imu.get().a_vel_filtered[i] = 0.0
                     else:
-                        imu.get().a_vel_filtered[i] = each - imu.get().bias[i]
+                        imu.get().a_vel_filtered[i] = each - imu.get().g_bias[i]
+
+                for i, each in enumerate(imu.get().accel):
+                    if ((each < (imu.get().a_bias[i] + imu.get().a_deadband[i])) and (each > (imu.get().a_bias[i] - imu.get().a_deadband[i]))):
+
+                        imu.get().accel_filtered[i] = 0.0
+                    else:
+                        imu.get().accel_filtered[i] = each - imu.get().a_bias[i]
 
                 # use median filter for acceleromater readings to help with spikes
                 for i, each in enumerate(accel_hist):
                     each = np.roll(each, 1)
                     each[0] = imu.get().accel[i]
                     imu.get().accel_filtered[i] = np.sort(each)[int(size/2.0)]
-                imu.release()
+                imu.lock.release()
                 #logger.debug('released imu')
 
                 # update complementary filter
                 complementary_filter(logger)
             else:
-                imu.release()
+                imu.lock.release()
                 #logger.debug('released imu')
 
             time.sleep(poll_interval * 1.0/1000.0)
@@ -307,41 +323,60 @@ def calibrate_imu(stdscr, num_cal, logger, poll_interval):
 
     stdscr.addstr('Calibrating IMU: {} measurements\n'.format(num_cal))
     stdscr.refresh()
-    bias = [0.0, 0.0, 0.0]
-    deadband = [0.0,0.0,0.0]
-    min = [0.0, 0.0, 0.0]
-    max = [0.0, 0.0, 0.0]
+    g_bias = np.array([0.0, 0.0, 0.0])
+    a_bias = np.array([0.0, 0.0, 0.0])
+    g_deadband = np.array([0.0,0.0,0.0])
+    a_deadband = np.array([0.0,0.0,0.0])
+    g_min = np.array([0.0, 0.0, 0.0])
+    g_max = np.array([0.0, 0.0, 0.0])
+    a_min = np.array([0.0, 0.0, 0.0])
+    a_max = np.array([0.0, 0.0, 0.0])
 
     for j in range (0, num_cal):
-        imu.acquire()
+        imu.lock.acquire()
         logger.debug('acquired imu (calibrate)')
         for i, each in enumerate(imu.get().a_vel):
-            bias[i] = bias[i] + each
-            if each > max[i]:
-                max[i] = each
-            elif each < min[i]:
-                min[i] = each
-        imu.release()
+            g_bias[i] = g_bias[i] + each
+            if each > g_max[i]:
+                g_max[i] = each
+            elif each < g_min[i]:
+                g_min[i] = each
+
+        for i, each in enumerate(imu.get().accel):
+            a_bias[i] = a_bias[i] + each
+            if each > a_max[i]:
+                a_max[i] = each
+            elif each < a_min[i]:
+                a_min[i] = each
+
+        imu.lock.release()
         logger.debug('released imu (calibrate)')
 
         # wait for imu readings to update
         time.sleep(10.0 * poll_interval * 1.0/1000.0)
 
-    bias[:] = [k / num_cal for k in bias]
-    deadband[:] = [(max[m] - min[m]) for m in range(len(min))]
-    imu.acquire()
+    g_bias[:] = [k / num_cal for k in g_bias]
+    g_deadband[:] = [(g_max[m] - g_min[m]) for m in range(len(g_min))]
+    imu.lock.acquire()
     logger.debug('acquired imu (set bias and deadband)')
-    imu.get().bias = bias
-    imu.get().deadband = deadband
+    imu.get().g_bias = g_bias
+    imu.get().g_deadband = g_deadband
+
+    a_bias[:] = [k / num_cal for k in a_bias]
+    a_deadband[:] = [(a_max[m] - a_min[m]) for m in range(len(a_min))]
+    imu.get().a_bias = a_bias
+    imu.get().a_deadband = a_deadband
+
     imu.get().calibrated = True
-    imu.release()
+    imu.lock.release()
     logger.debug('released imu (set bias and deadband)')
     stdscr.addstr('Calibration Complete.\n')
-    stdscr.addstr('bias: {}   deadband: {}\n'.format(bias, deadband))
+    stdscr.addstr('Gyro:  bias: {}   deadband: {}\n'.format(g_bias, g_deadband))
+    stdscr.addstr('Accel: bias: {}   deadband: {}\n'.format(a_bias, a_deadband))
     stdscr.refresh()
     time.sleep(2)
 
-    logger.info('calibrated imu: deadband={}, bias={}'.format(deadband, bias))
+    logger.info('calibrated imu: deadband={}, bias={}'.format(g_deadband, g_bias))
 
 # display hopefully useful info
 # things to add: bias, deadband, accel, vel, etc.
@@ -349,8 +384,8 @@ def update_scr(stdscr):
     global imu
     global control
     stdscr.erase()
-    imu.acquire()
-    control.acquire()
+    imu.lock.acquire()
+    control.lock.acquire()
     #logger.debug('acquired imu')
 
     stdscr.addstr(0,0,'gyro             - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().a_vel))
@@ -365,9 +400,10 @@ def update_scr(stdscr):
         control.get().state['o'], control.get().state['tri'], control.get().state['sqr']))
     stdscr.addstr(9,0,'l: {}  r: {}  u: {}  d: {}'.format(control.get().state['left'],
         control.get().state['right'], control.get().state['up'], control.get().state['down']))
+    stdscr.addstr(10,0,'bias_gyro        - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().g_bias))
 
-    imu.release()
-    control.release()
+    imu.lock.release()
+    control.lock.release()
     #logger.debug('released imu')
     stdscr.refresh()
 
@@ -381,7 +417,7 @@ def complementary_filter(logger):
     # gyroscope data returns only change in pos
     # p = integral(dp/dt)
     # because this is a discrete case, just sum change times time elapsed
-    imu.acquire()
+    imu.lock.acquire()
     #logger.debug('acquired imu')
     delta_t = (imu.get().time_cur - imu.get().time_prev) / 10**6    # convert from microseconds to seconds
     for i, each in enumerate(tmp_gyro):
@@ -394,7 +430,7 @@ def complementary_filter(logger):
 
     # Note: only pitch and roll are valid from this estimation (for yaw use compass)
     imu.get().angle_comp += conf['gyro_sensitivity'] * tmp_gyro + (1-conf['gyro_sensitivity']) * tmp_acc
-    imu.release()
+    imu.lock.release()
 
 def main(stdscr):
     global control
