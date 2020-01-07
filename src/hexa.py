@@ -306,12 +306,12 @@ def read_imu(stdscr, logger, poll_interval):
                 logger.debug('accel_hist init: {}'.format(accel_hist))
                 for i, each in enumerate(accel_hist):
                     each = np.roll(each, 1)
-                    logger.debug('accel_hist roll: {}'.format(accel_hist))
+                    logger.debug('accel_hist roll: {}'.format(accel_hist[i]))
                     each[0] = imu.get().accel_filtered[i]
-                    logger.debug('accel_hist update: {}'.format(accel_hist))
+                    logger.debug('accel_hist update: {}'.format(accel_hist[i]))
                     imu.get().accel_filtered[i] = np.sort(each)[int(size/2.0)]
-                    logger.debug('accel_hist after: {}'.format(accel_hist))
-                    logger.debug('media value: {}'.format(np.sort(each)[int(size/2.0)]))
+                    logger.debug('accel_hist after: {}'.format(accel_hist[i]))
+                    logger.debug('median value: {}'.format(np.sort(each)[int(size/2.0)]))
                 imu.lock.release()
                 #logger.debug('released imu')
 
@@ -381,7 +381,8 @@ def calibrate_imu(stdscr, num_cal, logger, poll_interval):
     stdscr.refresh()
     time.sleep(2)
 
-    logger.info('calibrated imu: deadband={}, bias={}'.format(g_deadband, g_bias))
+    logger.info('gyro: deadband={}, bias={}'.format(g_deadband, g_bias))
+    logger.info('accel: deadband={}, bias={}'.format(a_deadband, a_bias))
 
 # display hopefully useful info
 # things to add: bias, deadband, accel, vel, etc.
