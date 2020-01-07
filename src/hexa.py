@@ -302,6 +302,9 @@ def read_imu(stdscr, logger, poll_interval):
                     else:
                         imu.get().accel_filtered[i] = each - imu.get().a_bias[i]
 
+                # account for gravity
+                imu.get().accel_filtered[2] += 1.0
+
                 # use median filter for acceleromater readings to help with spikes
                 logger.debug('accel_hist init: {}'.format(accel_hist))
                 for i, each in enumerate(accel_hist):
