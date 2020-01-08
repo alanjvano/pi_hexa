@@ -414,13 +414,13 @@ def update_scr(stdscr):
     #logger.debug('acquired imu')
 
     stdscr.addstr(0,0,'gyro             - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().a_vel))
-    stdscr.addstr(1,0,'gyro_filtered    - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(np.degrees(imu.get().a_vel_filtered)))
+    stdscr.addstr(1,0,'gyro_filtered    - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().a_vel_filtered))
     stdscr.addstr(2,0,'accel            - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().accel))
     stdscr.addstr(3,0,'accel_filtered   - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().accel_filtered))
-    stdscr.addstr(4,0,'fusion           - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(np.degrees(imu.get().angle_fus)))
-    stdscr.addstr(5,0,'fusionq          - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(np.degrees(imu.get().angle_fus_q)))
-    stdscr.addstr(6,0,'complementary    - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(np.degrees(imu.get().angle_comp)))
-    stdscr.addstr(7,0,'angle_accel      - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(np.degrees(imu.get().angle_accel)))
+    stdscr.addstr(4,0,'fusion           - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().angle_fus))
+    stdscr.addstr(5,0,'fusionq          - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().angle_fus_q))
+    stdscr.addstr(6,0,'complementary    - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().angle_comp))
+    stdscr.addstr(7,0,'angle_accel      - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().angle_accel))
     stdscr.addstr(8,0,'bias_gyro        - {0[0]:^10.5f}  {0[1]:^10.5f}  {0[2]:^10.5f}'.format(imu.get().g_bias))
     stdscr.addstr(9,0,'bias_accel       - {0[0]:^10.5f}  {0[1]:^10.5f}  {0[2]:^10.5f}'.format(imu.get().a_bias))
     stdscr.addstr(10,0,'deadband_gyro    - {}'.format(imu.get().g_deadband))
@@ -457,11 +457,10 @@ def complementary_filter(logger):
 
     # based on Tilt Sensing Using a Three-Axis Accelerometer by Mark Pedley
     # (http://cache.freescale.com/files/sensors/doc/app_note/AN3461.pdf?fpsp=1)
-    imu.get().angle_accel[0] = math.degrees(math.atan2(imu.get().accel_filtered[1],
-        imu.get().accel_filtered[2]))
-    logger.debug('accel roll (y/z): {} / {} = {}'.format(imu.get().accel_filtered[1], imu.get().accel_filtered[2], imu.get().accel_filtered[1] / imu.get().accel_filtered[2]))
-    logger.debug('accel roll atan(y/z) (rad, deg): {} {}'.format(math.atan2(imu.get().accel_filtered[1],
-        imu.get().accel_filtered[2]), math.degrees(math.atan2(imu.get().accel_filtered[1], imu.get().accel_filtered[2]))))
+    imu.get().angle_accel[0] = math.degrees(math.atan2(imu.get().accel_filtered[1], imu.get().accel_filtered[2]))
+    #logger.debug('accel roll (y/z): {} / {} = {}'.format(imu.get().accel_filtered[1], imu.get().accel_filtered[2], imu.get().accel_filtered[1] / imu.get().accel_filtered[2]))
+    #logger.debug('accel roll atan(y/z) (rad, deg): {} {}'.format(math.atan2(imu.get().accel_filtered[1],
+    # imu.get().accel_filtered[2]), math.degrees(math.atan2(imu.get().accel_filtered[1], imu.get().accel_filtered[2]))))
     imu.get().angle_accel[1] = math.degrees(math.atan2(-1 * imu.get().accel_filtered[0],
         ((imu.get().accel_filtered[1]**2 + imu.get().accel_filtered[2]**2)**0.5) ))
 
