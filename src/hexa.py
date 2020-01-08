@@ -310,15 +310,15 @@ def read_imu(stdscr, logger, poll_interval):
                 #imu.get().accel_filtered[2] += 1.0
 
                 # use median filter for acceleromater readings to help with spikes
-                logger.debug('current accel: {}'.format(imu.get().accel))
-                logger.debug('accel_hist init: {}'.format(accel_hist))
+                #logger.debug('current accel: {}'.format(imu.get().accel))
+                #logger.debug('accel_hist init: {}'.format(accel_hist))
                 for i, each in enumerate(accel_hist):
                     accel_hist[i] = np.roll(each, 1)
-                    logger.debug('accel_hist roll ({}): {}'.format(i, accel_hist[i]))
+                    #logger.debug('accel_hist roll ({}): {}'.format(i, accel_hist[i]))
                     accel_hist[i][0] = imu.get().accel[i]
                     imu.get().accel_filtered[i] = np.median(accel_hist[i])
-                    logger.debug('accel_hist update ({}): {}'.format(i, accel_hist[i]))
-                    logger.debug('numpy median ({}): {}'.format(i, np.median(accel_hist[i])))
+                    #logger.debug('accel_hist update ({}): {}'.format(i, accel_hist[i]))
+                    #logger.debug('numpy median ({}): {}'.format(i, np.median(accel_hist[i])))
                     #logger.debug('accel_ hist sort ({}):'.format(i, np.sort(each)))
                     #imu.get().accel_filtered[i] = np.sort(each)[int(size/2.0)]
                     #logger.debug('accel_hist after ({}): {}'.format(i, accel_hist[i]))
