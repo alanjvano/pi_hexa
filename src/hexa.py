@@ -295,17 +295,21 @@ def read_imu(stdscr, logger, poll_interval):
                     else:
                         imu.get().a_vel_filtered[i] = each - imu.get().g_bias[i]
 
-                for i, each in enumerate(imu.get().accel):
-                    if ((each < (imu.get().a_bias[i] + imu.get().a_deadband[i])) and (each > (imu.get().a_bias[i] - imu.get().a_deadband[i]))):
+                #for i, each in enumerate(imu.get().accel):
+                #    if ((each < (imu.get().a_bias[i] + imu.get().a_deadband[i])) and (each > (imu.get().a_bias[i] - imu.get().a_deadband[i]))):
 
-                        imu.get().accel_filtered[i] = 0.0
-                    else:
-                        imu.get().accel_filtered[i] = each - imu.get().a_bias[i]
+                #        imu.get().accel_filtered[i] = 0.0
+                #    else:
+                #        imu.get().accel_filtered[i] = each - imu.get().a_bias[i]
+
+                # currently bypass deadband and bias filter
+                imu.get().accel_filtered = imu.get().accel
 
                 # account for gravity
-                imu.get().accel_filtered[2] += 1.0
+                #imu.get().accel_filtered[2] += 1.0
 
                 # use median filter for acceleromater readings to help with spikes
+                logger.debug('current accel: {}'.format(imu.get().accel))
                 logger.debug('accel_hist init: {}'.format(accel_hist))
                 for i, each in enumerate(accel_hist):
                     accel_hist[i] = np.roll(each, 1)
@@ -406,8 +410,8 @@ def update_scr(stdscr):
     stdscr.addstr(6,0,'complementary    - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(np.degrees(imu.get().angle_comp)))
     stdscr.addstr(7,0,'bias_gyro        - {0[0]:^10.5f}  {0[1]:^10.5f}  {0[2]:^10.5f}'.format(imu.get().g_bias))
     stdscr.addstr(8,0,'bias_accel       - {0[0]:^10.5f}  {0[1]:^10.5f}  {0[2]:^10.5f}'.format(imu.get().a_bias))
-    stdscr.addstr(9,0,'deadband_gyro    - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().g_deadband))
-    stdscr.addstr(10,0,'deadband_accel   - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().a_deadband))
+    stdscr.addstr(9,0,'deadband_gyro    - {}'.format(imu.get().g_deadband))
+    stdscr.addstr(10,0,'deadband_accel   - {}'.format(imu.get().a_deadband))
     stdscr.addstr(11,0,'time - {}'.format(imu.get().time_cur))
     stdscr.addstr(12,0,'X: {}  O: {}  Tri: {}  Sqr: {}'.format(control.get().state['x'],
         control.get().state['o'], control.get().state['tri'], control.get().state['sqr']))
