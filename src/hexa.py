@@ -457,8 +457,8 @@ def complementary_filter(logger):
 
     # based on Tilt Sensing Using a Three-Axis Accelerometer by Mark Pedley
     # (http://cache.freescale.com/files/sensors/doc/app_note/AN3461.pdf?fpsp=1)
-    imu.get().angle_accel[0] = math.degrees(math.atan(imu.get().accel_filtered[1]/imu.get().accel_filtered[2]))
-    imu.get().angle_accel[1] = math.degrees(math.atan(-1 * imu.get().accel_filtered[0] /
+    imu.get().angle_accel[0] = math.degrees(math.atan2(imu.get().accel_filtered[1]/imu.get().accel_filtered[2]))
+    imu.get().angle_accel[1] = math.degrees(math.atan2(-1 * imu.get().accel_filtered[0] /
         (( (imu.get().accel_filtered[1]**2) + (imu.get().accel_filtered[2]**2))**0.5) ))
 
     # Note: only pitch and roll are valid from this estimation (for yaw use compass)
