@@ -111,6 +111,7 @@ class Controller:
             'l_trig_a': 0.0,
             'r_trig_a': 0.0
         }
+        self.throttle = 0.0
 
 class IMU:
     def __init__(self):
@@ -132,6 +133,9 @@ class IMU:
         self.g_deadband = 0.0
         self.a_deadband = 0.0
         self.calibrated = False
+        self.stale = False
+
+
 
 def init_controller(stdscr, logger):
 
@@ -213,6 +217,12 @@ def read_controller(dev,logger):
                 if event.type == 3:
                     control.get().state[ps3_codes[event.code]] = event.value
 
+                # update inputs
+                if control.get().l_trig_d:
+                    control.get().throttle -= 0.1 * control.get().l_trig_a
+                if control.get().r_trig_d:
+                    control.get().throttle += 0.1 * control.get().r_trig_a
+
                 control.lock.release()
                 #logger.debug('released control')
 
@@ -290,6 +300,13 @@ def read_imu(stdscr, logger, poll_interval):
             # print((time_cur - self.last_update)*10**6)
 
             if imu.get().calibrated:
+                # check for stale values
+                if len(np.unique(accel_hist[0])) == 1:
+                    # stale values
+                    imu.get().stale = True
+                else:
+                    imu.get().stale = False
+
                 # check deadband and account for bias
                 for i, each in enumerate(imu.get().a_vel):
                     if ((each < (imu.get().g_bias[i] + deadband_range * imu.get().g_deadband[i])) and (each > (imu.get().g_bias[i] - deadband_range * imu.get().g_deadband[i]))):
@@ -433,10 +450,13 @@ def update_scr(stdscr):
     stdscr.addstr(10,0,'deadband_gyro    - {}'.format(imu.get().g_deadband))
     stdscr.addstr(11,0,'deadband_accel   - {}'.format(imu.get().a_deadband))
     stdscr.addstr(12,0,'time - {}'.format(imu.get().time_cur))
-    stdscr.addstr(13,0,'X: {}  O: {}  Tri: {}  Sqr: {}'.format(control.get().state['x'],
+    stdscr.addstr(14,0,'X: {}  O: {}  Tri: {}  Sqr: {}'.format(control.get().state['x'],
         control.get().state['o'], control.get().state['tri'], control.get().state['sqr']))
-    stdscr.addstr(14,0,'l: {}  r: {}  u: {}  d: {}'.format(control.get().state['left'],
+    stdscr.addstr(15,0,'l: {}  r: {}  u: {}  d: {}'.format(control.get().state['left'],
         control.get().state['right'], control.get().state['up'], control.get().state['down']))
+    stdscr.addstr(16,0,'l_trig: {:^6}   r_trig: {:^6}'.format(control.get().state['l_trig_a'], control.get().state['r_trig_a']))
+    stdscr.addstr(18,0, 'imu responding: {}'.format(imu.get().stale))
+    stdscr.addstr(19,0, 'throttle: {}'.format(control.get().throttle))
 
 
     imu.lock.release()
