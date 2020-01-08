@@ -301,11 +301,11 @@ def read_imu(stdscr, logger, poll_interval):
 
             if imu.get().calibrated:
                 # check for stale values
-                if len(np.unique(accel_hist[0])) == 1:
+                #if len(np.unique(accel_hist[0])) == 1:
                     # stale values
-                    imu.get().stale = True
-                else:
-                    imu.get().stale = False
+                #    imu.get().stale = True
+                #else:
+                #    imu.get().stale = False
 
                 # check deadband and account for bias
                 for i, each in enumerate(imu.get().a_vel):
