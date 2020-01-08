@@ -267,6 +267,8 @@ def read_imu(stdscr, logger, poll_interval):
 
     size = conf['accel_filter_num']
     accel_hist = np.zeros((3, size))
+    alpha = conf['accel_low_pass_filter'] # smoothing factor for low pass filter for accel readings
+    deadband_range = conf['deadband_range']
 
     while True:
         #logging.debug('running')
@@ -290,8 +292,7 @@ def read_imu(stdscr, logger, poll_interval):
             if imu.get().calibrated:
                 # check deadband and account for bias
                 for i, each in enumerate(imu.get().a_vel):
-                    if ((each < (imu.get().g_bias[i] + imu.get().g_deadband[i])) and (each > (imu.get().g_bias[i] - imu.get().g_deadband[i]))):
-
+                    if ((each < (imu.get().g_bias[i] + deadband_range * imu.get().g_deadband[i])) and (each > (imu.get().g_bias[i] - deadband_range * imu.get().g_deadband[i]))):
                         imu.get().a_vel_filtered[i] = 0.0
                     else:
                         imu.get().a_vel_filtered[i] = each - imu.get().g_bias[i]
@@ -316,12 +317,18 @@ def read_imu(stdscr, logger, poll_interval):
                     accel_hist[i] = np.roll(each, 1)
                     #logger.debug('accel_hist roll ({}): {}'.format(i, accel_hist[i]))
                     accel_hist[i][0] = imu.get().accel[i]
+                    # also useful to have a low-pass filter?
+                    prev = imu.get().accel_filtered[i]
                     imu.get().accel_filtered[i] = np.median(accel_hist[i])
+                    imu.get().accel_filtered[i] = imu.get().accel_filtered[i]*alpha + (1-alpha)*prev
+
+
                     #logger.debug('accel_hist update ({}): {}'.format(i, accel_hist[i]))
                     #logger.debug('numpy median ({}): {}'.format(i, np.median(accel_hist[i])))
                     #logger.debug('accel_ hist sort ({}):'.format(i, np.sort(each)))
                     #imu.get().accel_filtered[i] = np.sort(each)[int(size/2.0)]
                     #logger.debug('accel_hist after ({}): {}'.format(i, accel_hist[i]))
+
                 imu.lock.release()
                 #logger.debug('released imu')
 
