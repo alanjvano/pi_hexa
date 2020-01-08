@@ -315,7 +315,7 @@ def read_imu(stdscr, logger, poll_interval):
                     each = np.roll(each, 1)
                     logger.debug('accel_hist roll ({}): {}'.format(i, accel_hist[i]))
                     each[0] = imu.get().accel[i]
-                    accel_filtered[i] = np.median(each)
+                    imu.get().accel_filtered[i] = np.median(each)
                     logger.debug('accel_hist update ({}): {}'.format(i, each))
                     logger.debug('numpy median ({}): {}'.format(i, np.median(each)))
                     #logger.debug('accel_ hist sort ({}):'.format(i, np.sort(each)))
