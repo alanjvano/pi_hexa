@@ -435,7 +435,7 @@ def update_scr(stdscr):
     stdscr.erase()
     imu.lock.acquire()
     control.lock.acquire()
-    logger.debug('acquired imu and control')
+    #logger.debug('acquired imu and control')
 
     stdscr.addstr(0,0,'gyro             - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().a_vel))
     stdscr.addstr(1,0,'gyro_filtered    - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().a_vel_filtered))
@@ -461,7 +461,7 @@ def update_scr(stdscr):
 
     imu.lock.release()
     control.lock.release()
-    logger.debug('released imu and control')
+    #logger.debug('released imu and control')
     stdscr.refresh()
 
 def complementary_filter(logger):
