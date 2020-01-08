@@ -312,7 +312,7 @@ def read_imu(stdscr, logger, poll_interval):
                 logger.debug('current accel: {}'.format(imu.get().accel))
                 logger.debug('accel_hist init: {}'.format(accel_hist))
                 for i, each in enumerate(accel_hist):
-                    accel_hist[i] = np.roll(each, 1)
+                    accel_hist[i] = np.roll(accel_hist[i], 1)
                     logger.debug('accel_hist roll ({}): {}'.format(i, accel_hist[i]))
                     accel_hist[i][0] = imu.get().accel_filtered[i]
                     logger.debug('accel_hist update ({}): {}'.format(i, accel_hist[i]))
