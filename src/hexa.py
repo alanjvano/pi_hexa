@@ -303,7 +303,7 @@ def read_imu(stdscr, logger, poll_interval):
                 #        imu.get().accel_filtered[i] = each - imu.get().a_bias[i]
 
                 # currently bypass deadband and bias filter
-                imu.get().accel_filtered = imu.get().accel
+                #imu.get().accel_filtered = imu.get().accel
 
                 # account for gravity
                 #imu.get().accel_filtered[2] += 1.0
@@ -312,15 +312,15 @@ def read_imu(stdscr, logger, poll_interval):
                 logger.debug('current accel: {}'.format(imu.get().accel))
                 logger.debug('accel_hist init: {}'.format(accel_hist))
                 for i, each in enumerate(accel_hist):
-                    accel_hist[i] = np.roll(each, 1)
+                    each = np.roll(each, 1)
                     logger.debug('accel_hist roll ({}): {}'.format(i, accel_hist[i]))
-                    each[0] = imu.get().accel_filtered[i]
+                    each[0] = imu.get().accel[i]
+                    accel_filtered[i] = np.median(each)
                     logger.debug('accel_hist update ({}): {}'.format(i, each))
                     logger.debug('numpy median ({}): {}'.format(i, np.median(each)))
-                    logger.debug('accel_ hist sort ({}):'.format(i, np.sort(each)))
-                    imu.get().accel_filtered[i] = np.sort(each)[int(size/2.0)]
-                    logger.debug('accel_hist after ({}): {}'.format(i, accel_hist[i]))
-                    logger.debug('median value ({}): {}'.format(i, np.sort(each)[int(size/2.0)]))
+                    #logger.debug('accel_ hist sort ({}):'.format(i, np.sort(each)))
+                    #imu.get().accel_filtered[i] = np.sort(each)[int(size/2.0)]
+                    #logger.debug('accel_hist after ({}): {}'.format(i, accel_hist[i]))
                 imu.lock.release()
                 #logger.debug('released imu')
 
