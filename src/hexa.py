@@ -121,7 +121,8 @@ class IMU:
         self.a_vel = np.array([0.0,0.0,0.0])
         self.a_vel_filtered = np.array([0.0,0.0,0.0])
         self.angle_comp = np.array([0.0,0.0,0.0])
-        self.angle_comp = np.array([0.0,0.0,0.0])
+        self.angle_accel = np.array([0.0,0.0,0.0])
+        self.angle_gyro = np.array([0.0,0.0,0.0])
         self.angle_fus = np.array([0.0,0.0,0.0])
         self.angle_fus_q = np.array([0.0,0.0,0.0])
         self.g_bias = np.array([0.0,0.0,0.0])
@@ -419,14 +420,15 @@ def update_scr(stdscr):
     stdscr.addstr(4,0,'fusion           - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(np.degrees(imu.get().angle_fus)))
     stdscr.addstr(5,0,'fusionq          - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(np.degrees(imu.get().angle_fus_q)))
     stdscr.addstr(6,0,'complementary    - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(np.degrees(imu.get().angle_comp)))
-    stdscr.addstr(7,0,'bias_gyro        - {0[0]:^10.5f}  {0[1]:^10.5f}  {0[2]:^10.5f}'.format(imu.get().g_bias))
-    stdscr.addstr(8,0,'bias_accel       - {0[0]:^10.5f}  {0[1]:^10.5f}  {0[2]:^10.5f}'.format(imu.get().a_bias))
-    stdscr.addstr(9,0,'deadband_gyro    - {}'.format(imu.get().g_deadband))
-    stdscr.addstr(10,0,'deadband_accel   - {}'.format(imu.get().a_deadband))
-    stdscr.addstr(11,0,'time - {}'.format(imu.get().time_cur))
-    stdscr.addstr(12,0,'X: {}  O: {}  Tri: {}  Sqr: {}'.format(control.get().state['x'],
+    stdscr.addstr(7,0,'angle_accel      - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(np.degrees(imu.get().angle_accel)))
+    stdscr.addstr(8,0,'bias_gyro        - {0[0]:^10.5f}  {0[1]:^10.5f}  {0[2]:^10.5f}'.format(imu.get().g_bias))
+    stdscr.addstr(9,0,'bias_accel       - {0[0]:^10.5f}  {0[1]:^10.5f}  {0[2]:^10.5f}'.format(imu.get().a_bias))
+    stdscr.addstr(10,0,'deadband_gyro    - {}'.format(imu.get().g_deadband))
+    stdscr.addstr(11,0,'deadband_accel   - {}'.format(imu.get().a_deadband))
+    stdscr.addstr(12,0,'time - {}'.format(imu.get().time_cur))
+    stdscr.addstr(13,0,'X: {}  O: {}  Tri: {}  Sqr: {}'.format(control.get().state['x'],
         control.get().state['o'], control.get().state['tri'], control.get().state['sqr']))
-    stdscr.addstr(13,0,'l: {}  r: {}  u: {}  d: {}'.format(control.get().state['left'],
+    stdscr.addstr(14,0,'l: {}  r: {}  u: {}  d: {}'.format(control.get().state['left'],
         control.get().state['right'], control.get().state['up'], control.get().state['down']))
 
 
@@ -449,15 +451,19 @@ def complementary_filter(logger):
     #logger.debug('acquired imu')
     delta_t = (imu.get().time_cur - imu.get().time_prev) / 10**6    # convert from microseconds to seconds
     for i, each in enumerate(tmp_gyro):
-        each = imu.get().a_vel[i] * delta_t
+        tmp_gyro[i] = imu.get().a_vel[i] * delta_t
+
+    #imu.get().angle_gyro += tmp_gyro # estimate angle only from gyroscope
 
     # based on Tilt Sensing Using a Three-Axis Accelerometer by Mark Pedley
     # (http://cache.freescale.com/files/sensors/doc/app_note/AN3461.pdf?fpsp=1)
-    tmp_acc[0] = math.atan(imu.get().accel_filtered[1]/imu.get().accel_filtered[2])
-    tmp_acc[1] = math.atan(-1 * imu.get().accel_filtered[0] / (( (imu.get().accel_filtered[1]**2) + (imu.get().accel_filtered[2]**2))**0.5) )
+    imu.get().angle_accel[0] = math.degrees(math.atan(imu.get().accel_filtered[1]/imu.get().accel_filtered[2]))
+    imu.get().angle_accel[1] = math.degrees(math.atan(-1 * imu.get().accel_filtered[0] /
+        (( (imu.get().accel_filtered[1]**2) + (imu.get().accel_filtered[2]**2))**0.5) ))
 
     # Note: only pitch and roll are valid from this estimation (for yaw use compass)
-    imu.get().angle_comp += conf['gyro_sensitivity'] * tmp_gyro + (1-conf['gyro_sensitivity']) * tmp_acc
+    imu.get().angle_comp = conf['gyro_sensitivity'] * (imu.get().angle_comp + (tmp_gyro * delta_t)
+        + (1-conf['gyro_sensitivity']) * imu.get().angle_accel
     imu.lock.release()
 
 def main(stdscr):
