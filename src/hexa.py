@@ -206,7 +206,7 @@ def read_controller(dev,logger):
         try:
             for event in dev.read_loop():
                 control.lock.acquire()
-                logger.debug('acquired control')
+                #logger.debug('acquired control')
 
                 # handle button presses
                 if event.type == 1:
@@ -224,7 +224,7 @@ def read_controller(dev,logger):
                     control.get().throttle += 0.1 * control.get().r_trig_a
 
                 control.lock.release()
-                logger.debug('released control')
+                #logger.debug('released control')
 
         # in case the controller goes to asleep or disconnects try to reconnect
         except:
