@@ -459,6 +459,9 @@ def complementary_filter(logger):
     # (http://cache.freescale.com/files/sensors/doc/app_note/AN3461.pdf?fpsp=1)
     imu.get().angle_accel[0] = math.degrees(math.atan2(imu.get().accel_filtered[1],
         imu.get().accel_filtered[2]))
+    logger.debug('accel roll (y/z): {} / {} = {}'.format(imu.get().accel_filtered[1], imu.get().accel_filtered[2], imu.get().accel_filtered[1] / imu.get().accel_filtered[2]))
+    logger.debug('accel roll atan(y/z) (rad, deg): {} {}'.format(math.atan2(imu.get().accel_filtered[1],
+        imu.get().accel_filtered[2]), math.degrees(math.atan2(imu.get().accel_filtered[1], imu.get().accel_filtered[2]))))
     imu.get().angle_accel[1] = math.degrees(math.atan2(-1 * imu.get().accel_filtered[0],
         ((imu.get().accel_filtered[1]**2 + imu.get().accel_filtered[2]**2)**0.5) ))
 
