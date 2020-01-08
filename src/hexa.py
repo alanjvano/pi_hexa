@@ -123,7 +123,7 @@ class IMU:
         self.angle_comp = np.array([0.0,0.0,0.0])
         self.angle_accel = np.array([0.0,0.0,0.0])
         self.angle_gyro = np.array([0.0,0.0,0.0])
-        self.angle_fus = np.array([0.0,0.0,0.0])
+        self.angle_fus = np.array([0.0,0.0,0.0])  # this is in radians
         self.angle_fus_q = np.array([0.0,0.0,0.0])
         self.g_bias = np.array([0.0,0.0,0.0])
         self.a_bias = np.array([0.0,0.0,0.0])
@@ -417,7 +417,7 @@ def update_scr(stdscr):
     stdscr.addstr(1,0,'gyro_filtered    - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().a_vel_filtered))
     stdscr.addstr(2,0,'accel            - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().accel))
     stdscr.addstr(3,0,'accel_filtered   - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().accel_filtered))
-    stdscr.addstr(4,0,'fusion           - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().angle_fus))
+    stdscr.addstr(4,0,'fusion           - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(math.degrees(imu.get().angle_fus)))
     stdscr.addstr(5,0,'fusionq          - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().angle_fus_q))
     stdscr.addstr(6,0,'complementary    - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().angle_comp))
     stdscr.addstr(7,0,'angle_accel      - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}'.format(imu.get().angle_accel))
