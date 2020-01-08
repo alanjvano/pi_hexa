@@ -462,8 +462,7 @@ def complementary_filter(logger):
         (( (imu.get().accel_filtered[1]**2) + (imu.get().accel_filtered[2]**2))**0.5) ))
 
     # Note: only pitch and roll are valid from this estimation (for yaw use compass)
-    imu.get().angle_comp = conf['gyro_sensitivity'] * (imu.get().angle_comp + (tmp_gyro * delta_t))
-        + (1-conf['gyro_sensitivity']) * imu.get().angle_accel
+    imu.get().angle_comp = conf['gyro_sensitivity'] * (imu.get().angle_comp + (tmp_gyro * delta_t)) + (1-conf['gyro_sensitivity']) * imu.get().angle_accel
     imu.lock.release()
 
 def main(stdscr):
