@@ -313,12 +313,12 @@ def read_imu(stdscr, logger, poll_interval):
                 logger.debug('accel_hist init: {}'.format(accel_hist))
                 for i, each in enumerate(accel_hist):
                     accel_hist[i] = np.roll(each, 1)
-                    logger.debug('accel_hist roll: {}'.format(accel_hist[i]))
+                    logger.debug('accel_hist roll ({}): {}'.format(i, accel_hist[i]))
                     accel_hist[i][0] = imu.get().accel_filtered[i]
-                    logger.debug('accel_hist update: {}'.format(accel_hist[i]))
+                    logger.debug('accel_hist update ({}): {}'.format(i, accel_hist[i]))
                     imu.get().accel_filtered[i] = np.sort(accel_hist[i])[int(size/2.0)]
-                    logger.debug('accel_hist after: {}'.format(accel_hist[i]))
-                    logger.debug('median value: {}'.format(np.sort(each)[int(size/2.0)]))
+                    logger.debug('accel_hist after ({}): {}'.format(i, accel_hist[i]))
+                    logger.debug('median value ({}): {}'.format(i, np.sort(each)[int(size/2.0)]))
                 imu.lock.release()
                 #logger.debug('released imu')
 
@@ -343,6 +343,15 @@ def calibrate_imu(stdscr, num_cal, logger, poll_interval):
     g_max = np.array([0.0, 0.0, 0.0])
     a_min = np.array([0.0, 0.0, 0.0])
     a_max = np.array([0.0, 0.0, 0.0])
+
+    # wait of imu to start reading data
+    loading = True
+    while loading:
+        imu.lock.acquire()
+        if abs(imu.get().a_vel[0]) > 0.000001:
+            loading = False
+        imu.lock.release()
+    time.sleep(0.1) # just in case
 
     for j in range (0, num_cal):
         imu.lock.acquire()
