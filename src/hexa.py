@@ -206,7 +206,7 @@ def read_controller(dev,logger):
         try:
             for event in dev.read_loop():
                 control.lock.acquire()
-                #logger.debug('acquired control')
+                logger.debug('acquired control')
 
                 # handle button presses
                 if event.type == 1:
@@ -224,7 +224,7 @@ def read_controller(dev,logger):
                     control.get().throttle += 0.1 * control.get().r_trig_a
 
                 control.lock.release()
-                #logger.debug('released control')
+                logger.debug('released control')
 
         # in case the controller goes to asleep or disconnects try to reconnect
         except:
@@ -289,7 +289,7 @@ def read_imu(stdscr, logger, poll_interval):
             data = imu_dev.getIMUData()
 
             imu.lock.acquire()
-            #logger.debug('acquired imu')
+            logger.debug('acquired imu')
             imu.get().a_vel = data['gyro']
             imu.get().angle_fus = data['fusionPose']
             imu.get().angle_fus_q = data['fusionQPose']
@@ -301,11 +301,10 @@ def read_imu(stdscr, logger, poll_interval):
 
             if imu.get().calibrated:
                 # check for stale values
-                #if len(np.unique(accel_hist[0])) == 1:
-                    # stale values
-                #    imu.get().stale = True
-                #else:
-                #    imu.get().stale = False
+                if len(np.unique(accel_hist[0])) == 1:
+                    imu.get().stale = True
+                else:
+                    imu.get().stale = False
 
                 # check deadband and account for bias
                 for i, each in enumerate(imu.get().a_vel):
@@ -347,13 +346,13 @@ def read_imu(stdscr, logger, poll_interval):
                     #logger.debug('accel_hist after ({}): {}'.format(i, accel_hist[i]))
 
                 imu.lock.release()
-                #logger.debug('released imu')
+                logger.debug('released imu')
 
                 # update complementary filter
                 complementary_filter(logger)
             else:
                 imu.lock.release()
-                #logger.debug('released imu')
+                logger.debug('released imu')
 
             time.sleep(poll_interval * 1.0/1000.0)
 
@@ -475,7 +474,7 @@ def complementary_filter(logger):
     # p = integral(dp/dt)
     # because this is a discrete case, just sum change times time elapsed
     imu.lock.acquire()
-    #logger.debug('acquired imu')
+    logger.debug('acquired imu (comp filter)')
     delta_t = (imu.get().time_cur - imu.get().time_prev) / 10**6    # convert from microseconds to seconds
     for i, each in enumerate(tmp_gyro):
         tmp_gyro[i] = imu.get().a_vel[i] * delta_t
@@ -494,6 +493,7 @@ def complementary_filter(logger):
     # Note: only pitch and roll are valid from this estimation (for yaw use compass)
     imu.get().angle_comp = conf['gyro_sensitivity'] * (imu.get().angle_comp + (tmp_gyro * delta_t)) + (1-conf['gyro_sensitivity']) * imu.get().angle_accel
     imu.lock.release()
+    logger.debug('released imu (comp filter)')
 
 def main(stdscr):
     global control
