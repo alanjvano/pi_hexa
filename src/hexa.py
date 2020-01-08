@@ -228,6 +228,7 @@ def read_controller(dev,logger):
 
         # in case the controller goes to asleep or disconnects try to reconnect
         except:
+            control.lock.release()
             logger.info('controller disconnected')
             conn = False
             while not conn:
@@ -289,7 +290,7 @@ def read_imu(stdscr, logger, poll_interval):
             data = imu_dev.getIMUData()
 
             imu.lock.acquire()
-            logger.debug('acquired imu')
+            #logger.debug('acquired imu')
             imu.get().a_vel = data['gyro']
             imu.get().angle_fus = data['fusionPose']
             imu.get().angle_fus_q = data['fusionQPose']
@@ -346,13 +347,13 @@ def read_imu(stdscr, logger, poll_interval):
                     #logger.debug('accel_hist after ({}): {}'.format(i, accel_hist[i]))
 
                 imu.lock.release()
-                logger.debug('released imu')
+                #logger.debug('released imu')
 
                 # update complementary filter
                 complementary_filter(logger)
             else:
                 imu.lock.release()
-                logger.debug('released imu')
+                #logger.debug('released imu')
 
             time.sleep(poll_interval * 1.0/1000.0)
 
@@ -474,7 +475,7 @@ def complementary_filter(logger):
     # p = integral(dp/dt)
     # because this is a discrete case, just sum change times time elapsed
     imu.lock.acquire()
-    logger.debug('acquired imu (comp filter)')
+    #logger.debug('acquired imu (comp filter)')
     delta_t = (imu.get().time_cur - imu.get().time_prev) / 10**6    # convert from microseconds to seconds
     for i, each in enumerate(tmp_gyro):
         tmp_gyro[i] = imu.get().a_vel[i] * delta_t
@@ -493,7 +494,7 @@ def complementary_filter(logger):
     # Note: only pitch and roll are valid from this estimation (for yaw use compass)
     imu.get().angle_comp = conf['gyro_sensitivity'] * (imu.get().angle_comp + (tmp_gyro * delta_t)) + (1-conf['gyro_sensitivity']) * imu.get().angle_accel
     imu.lock.release()
-    logger.debug('released imu (comp filter)')
+    #logger.debug('released imu (comp filter)')
 
 def main(stdscr):
     global control
