@@ -454,9 +454,9 @@ def update_scr(stdscr):
         control.get().state['o'], control.get().state['tri'], control.get().state['sqr']))
     stdscr.addstr(15,0,'l: {}  r: {}  u: {}  d: {}'.format(control.get().state['left'],
         control.get().state['right'], control.get().state['up'], control.get().state['down']))
-    #stdscr.addstr(16,0,'l_trig: {:^6}   r_trig: {:^6}'.format(control.get().state['l_trig_a'], control.get().state['r_trig_a']))
-    #stdscr.addstr(18,0, 'imu responding: {}'.format(imu.get().stale))
-    #stdscr.addstr(19,0, 'throttle: {}'.format(control.get().throttle))
+    stdscr.addstr(16,0,'l_trig: {:^6}   r_trig: {:^6}'.format(control.get().state['l_trig_a'], control.get().state['r_trig_a']))
+    stdscr.addstr(18,0, 'imu responding: {}'.format(imu.get().stale))
+    stdscr.addstr(19,0, 'throttle: {}'.format(control.get().throttle))
 
 
     imu.lock.release()
