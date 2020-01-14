@@ -134,6 +134,7 @@ class IMU:
         self.a_deadband = 0.0
         self.calibrated = False
         self.stale = False
+        self.dt = 0.0 # converted to seconds
 
 
 
@@ -299,6 +300,8 @@ def read_imu(stdscr, logger, poll_interval):
             imu.get().time_prev = imu.get().time_cur
             imu.get().time_cur = data['timestamp']
             # print((time_cur - self.last_update)*10**6)
+            # converting to seconds
+            imu.get().dt = (imu.get().time_cur - imu.get().time_prev) / (10**6)
 
             if imu.get().calibrated:
                 # check for stale values
@@ -345,6 +348,11 @@ def read_imu(stdscr, logger, poll_interval):
                     #logger.debug('accel_ hist sort ({}):'.format(i, np.sort(each)))
                     #imu.get().accel_filtered[i] = np.sort(each)[int(size/2.0)]
                     #logger.debug('accel_hist after ({}): {}'.format(i, accel_hist[i]))
+
+                # estimate velcity and position based on acceleration
+                for i in range(3):
+                    imu.get().vel[i] += imu.get().accel[i] * imu.get().dt
+                    imu,get().pos[i] += imu.get().vel[i] * imu.get().dt
 
                 imu.lock.release()
                 #logger.debug('released imu')
@@ -449,12 +457,14 @@ def update_scr(stdscr):
     stdscr.addstr(9,0,'bias_accel       - {0[0]:^10.5f}  {0[1]:^10.5f}  {0[2]:^10.5f}'.format(imu.get().a_bias))
     stdscr.addstr(10,0,'deadband_gyro    - {}'.format(imu.get().g_deadband))
     stdscr.addstr(11,0,'deadband_accel   - {}'.format(imu.get().a_deadband))
-    stdscr.addstr(12,0,'time - {}'.format(imu.get().time_cur))
-    stdscr.addstr(14,0,'X: {}  O: {}  Tri: {}  Sqr: {}'.format(control.get().state['x'],
+    stdscr.addstr(12,0,'velocity         - {}'.format(imu.get().vel))
+    stdscr.addstr(13,0,'position         - {}'.format(imu.get().pos))
+    stdscr.addstr(14,0,'time - {}'.format(imu.get().time_cur))
+    stdscr.addstr(15,0,'X: {}  O: {}  Tri: {}  Sqr: {}'.format(control.get().state['x'],
         control.get().state['o'], control.get().state['tri'], control.get().state['sqr']))
-    stdscr.addstr(15,0,'l: {}  r: {}  u: {}  d: {}'.format(control.get().state['left'],
+    stdscr.addstr(16,0,'l: {}  r: {}  u: {}  d: {}'.format(control.get().state['left'],
         control.get().state['right'], control.get().state['up'], control.get().state['down']))
-    stdscr.addstr(16,0,'l_trig: {:^6}   r_trig: {:^6}'.format(control.get().state['l_trig_a'], control.get().state['r_trig_a']))
+    stdscr.addstr(17,0,'l_trig: {:^6}   r_trig: {:^6}'.format(control.get().state['l_trig_a'], control.get().state['r_trig_a']))
     stdscr.addstr(18,0, 'imu responding: {}'.format(imu.get().stale))
     stdscr.addstr(19,0, 'throttle: {}'.format(control.get().throttle))
 
@@ -476,9 +486,9 @@ def complementary_filter(logger):
     # because this is a discrete case, just sum change times time elapsed
     imu.lock.acquire()
     #logger.debug('acquired imu (comp filter)')
-    delta_t = (imu.get().time_cur - imu.get().time_prev) / 10**6    # convert from microseconds to seconds
+    #delta_t = (imu.get().time_cur - imu.get().time_prev) / 10**6    # convert from microseconds to seconds
     for i, each in enumerate(tmp_gyro):
-        tmp_gyro[i] = imu.get().a_vel[i] * delta_t
+        tmp_gyro[i] = imu.get().a_vel[i] * imu.get().dt
 
     #imu.get().angle_gyro += tmp_gyro # estimate angle only from gyroscope
 
@@ -492,7 +502,7 @@ def complementary_filter(logger):
         ((imu.get().accel_filtered[1]**2 + imu.get().accel_filtered[2]**2)**0.5) ))
 
     # Note: only pitch and roll are valid from this estimation (for yaw use compass)
-    imu.get().angle_comp = conf['gyro_sensitivity'] * (imu.get().angle_comp + (tmp_gyro * delta_t)) + (1-conf['gyro_sensitivity']) * imu.get().angle_accel
+    imu.get().angle_comp = conf['gyro_sensitivity'] * (imu.get().angle_comp + tmp_gyro) + (1-conf['gyro_sensitivity']) * imu.get().angle_accel
     imu.lock.release()
     #logger.debug('released imu (comp filter)')
 
@@ -517,10 +527,12 @@ def main(stdscr):
     try:
         control_t = Thread(name='contr_thread', target=read_controller, args=(ps3,logger,))
         imu_t = Thread(name='imu_thread', target=read_imu, args=(stdscr,logger, conf['poll_int']))
+        display_t = Thread(name='disp_thread', target=update_scr, args=(stdscr,))
         #control_t.setDaemon(true)
         #imu_t.setDaemon(true)
         control_t.start()
         imu_t.start()
+        display_t.start()
     except:
         logger.debug('threads failed to start')
 
@@ -536,8 +548,7 @@ def main(stdscr):
     rgb[3] = (0, 16000, 16000)
 
     while True:
-        update_scr(stdscr)
-        time.sleep(0.1)
+        pass
 
 if __name__ == "__main__":
     curses.wrapper(main)
