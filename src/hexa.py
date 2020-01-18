@@ -438,6 +438,7 @@ def calibrate_imu(stdscr, num_cal, logger, poll_interval):
 # display hopefully useful info
 # things to add: bias, deadband, accel, vel, etc.
 def update_scr(stdscr):
+    logger.debug('starting')
     global imu
     global control
     while true:
@@ -534,7 +535,6 @@ def main(stdscr):
         #imu_t.setDaemon(true)
         control_t.start()
         imu_t.start()
-        display_t.start()
     except:
         logger.debug('threads failed to start')
 
@@ -544,6 +544,7 @@ def main(stdscr):
     # start display thread
     try:
         display_t = Thread(name='disp_thread', target=update_scr, args=(stdscr,))
+        display_t.start()
     except:
         logger.debug('display thread failed to start')
 
