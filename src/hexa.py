@@ -440,40 +440,42 @@ def calibrate_imu(stdscr, num_cal, logger, poll_interval):
 def update_scr(stdscr):
     global imu
     global control
-    stdscr.erase()
-    imu.lock.acquire()
-    control.lock.acquire()
-    #logger.debug('acquired imu and control')
+    while true:
+        stdscr.erase()
+        imu.lock.acquire()
+        control.lock.acquire()
+        #logger.debug('acquired imu and control')
 
-    stdscr.addstr('gyro             - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().a_vel))
-    stdscr.addstr('gyro_filtered    - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().a_vel_filtered))
-    stdscr.addstr('accel            - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().accel))
-    stdscr.addstr('accel_filtered   - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().accel_filtered))
-    stdscr.addstr('fusion           - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(np.degrees(imu.get().angle_fus)))
-    stdscr.addstr('fusionq          - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().angle_fus_q))
-    stdscr.addstr('complementary    - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().angle_comp))
-    stdscr.addstr('angle_accel      - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().angle_accel))
-    stdscr.addstr('bias_gyro        - {0[0]:^10.5f}  {0[1]:^10.5f}  {0[2]:^10.5f}\n'.format(imu.get().g_bias))
-    stdscr.addstr('bias_accel       - {0[0]:^10.5f}  {0[1]:^10.5f}  {0[2]:^10.5f}\n'.format(imu.get().a_bias))
-    stdscr.addstr('deadband_gyro    - {}\n'.format(imu.get().g_deadband))
-    stdscr.addstr('deadband_accel   - {}\n'.format(imu.get().a_deadband))
-    stdscr.addstr('velocity         - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().vel))
-    stdscr.addstr('position         - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().pos))
-    stdscr.addstr('time - {}\n'.format(imu.get().time_cur))
-    stdscr.addstr('dt - {:^10.10f}\n'.format(imu.get().dt))
-    stdscr.addstr('X: {}  O: {}  Tri: {}  Sqr: {}\n'.format(control.get().state['x'],
-        control.get().state['o'], control.get().state['tri'], control.get().state['sqr']))
-    stdscr.addstr('l: {}  r: {}  u: {}  d: {}\n'.format(control.get().state['left'],
-        control.get().state['right'], control.get().state['up'], control.get().state['down']))
-    stdscr.addstr('l_trig: {:^6}   r_trig: {:^6}\n'.format(control.get().state['l_trig_a'], control.get().state['r_trig_a']))
-    stdscr.addstr('imu stale: {}\n'.format(imu.get().stale))
-    stdscr.addstr('throttle: {}\n'.format(control.get().throttle))
+        stdscr.addstr('gyro             - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().a_vel))
+        stdscr.addstr('gyro_filtered    - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().a_vel_filtered))
+        stdscr.addstr('accel            - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().accel))
+        stdscr.addstr('accel_filtered   - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().accel_filtered))
+        stdscr.addstr('fusion           - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(np.degrees(imu.get().angle_fus)))
+        stdscr.addstr('fusionq          - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().angle_fus_q))
+        stdscr.addstr('complementary    - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().angle_comp))
+        stdscr.addstr('angle_accel      - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().angle_accel))
+        stdscr.addstr('bias_gyro        - {0[0]:^10.5f}  {0[1]:^10.5f}  {0[2]:^10.5f}\n'.format(imu.get().g_bias))
+        stdscr.addstr('bias_accel       - {0[0]:^10.5f}  {0[1]:^10.5f}  {0[2]:^10.5f}\n'.format(imu.get().a_bias))
+        stdscr.addstr('deadband_gyro    - {}\n'.format(imu.get().g_deadband))
+        stdscr.addstr('deadband_accel   - {}\n'.format(imu.get().a_deadband))
+        stdscr.addstr('velocity         - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().vel))
+        stdscr.addstr('position         - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().pos))
+        stdscr.addstr('time - {}\n'.format(imu.get().time_cur))
+        stdscr.addstr('dt - {:^10.10f}\n'.format(imu.get().dt))
+        stdscr.addstr('X: {}  O: {}  Tri: {}  Sqr: {}\n'.format(control.get().state['x'],
+            control.get().state['o'], control.get().state['tri'], control.get().state['sqr']))
+        stdscr.addstr('l: {}  r: {}  u: {}  d: {}\n'.format(control.get().state['left'],
+            control.get().state['right'], control.get().state['up'], control.get().state['down']))
+        stdscr.addstr('l_trig: {:^6}   r_trig: {:^6}\n'.format(control.get().state['l_trig_a'], control.get().state['r_trig_a']))
+        stdscr.addstr('imu stale: {}\n'.format(imu.get().stale))
+        stdscr.addstr('throttle: {}\n'.format(control.get().throttle))
 
 
-    imu.lock.release()
-    control.lock.release()
-    #logger.debug('released imu and control')
-    stdscr.refresh()
+        imu.lock.release()
+        control.lock.release()
+        #logger.debug('released imu and control')
+        stdscr.refresh()
+        time.sleep(0.1)
 
 def complementary_filter(logger):
     global imu
@@ -528,7 +530,6 @@ def main(stdscr):
     try:
         control_t = Thread(name='contr_thread', target=read_controller, args=(ps3,logger,))
         imu_t = Thread(name='imu_thread', target=read_imu, args=(stdscr,logger, conf['poll_int']))
-        display_t = Thread(name='disp_thread', target=update_scr, args=(stdscr,))
         #control_t.setDaemon(true)
         #imu_t.setDaemon(true)
         control_t.start()
@@ -539,6 +540,12 @@ def main(stdscr):
 
     time.sleep(0.5) # wait for imu to init...
     calibrate_imu(stdscr, conf['num_cal'], logger, conf['poll_int'])
+
+    # start display thread
+    try:
+        display_t = Thread(name='disp_thread', target=update_scr, args=(stdscr,))
+    except:
+        logger.debug('display thread failed to start')
 
     # init rgb
     spi = busio.SPI(clock=board.SCK, MOSI=board.MOSI)
