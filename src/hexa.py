@@ -484,6 +484,7 @@ def update_scr(stdscr, logger):
         stdscr.erase()
         imu.lock.acquire()
         control.lock.acquire()
+        hexa.lock.acquire()
         #logger.debug('acquired imu and control')
 
         stdscr.addstr('gyro             - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().a_vel))
