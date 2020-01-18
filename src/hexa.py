@@ -250,11 +250,11 @@ def read_controller(dev,logger):
 
                 if enable_motors:
                     if control.get().l_bump and control.get().r_bump:
-                        if hexa.get().mode = 'unarmed':
+                        if hexa.get().mode == 'unarmed':
                             hexa.get().mode = 'armed'
                             hexa.get().arm()
                             logger.info('armed motors')
-                        elif hexa.get().mode = 'armed':
+                        elif hexa.get().mode == 'armed':
                             hexa.get().mode = 'unarmed'
                             hexa.get().unarm()
                             logger.info('unarmed motors')
@@ -603,4 +603,4 @@ def main(stdscr):
         pass
 
 if __name__ == "__main__":
-    curses.wrapper(main)
+    curses.wrapper(main)    ``
