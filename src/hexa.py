@@ -441,7 +441,7 @@ def update_scr(stdscr, logger):
     logger.debug('starting')
     global imu
     global control
-    while true:
+    while True:
         stdscr.erase()
         imu.lock.acquire()
         control.lock.acquire()
