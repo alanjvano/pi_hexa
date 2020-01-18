@@ -136,8 +136,6 @@ class IMU:
         self.stale = False
         self.dt = 0.0 # converted to seconds
 
-
-
 def init_controller(stdscr, logger):
 
     stdscr.addstr(1,0,"initializing controller...\n")

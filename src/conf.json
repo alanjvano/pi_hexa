@@ -5,5 +5,5 @@
 	"accel_low_pass_filter": 0.9,
 	"num_cal": 50,
 	"deadband_range": 1.0,
-	"poll_int": 4
+	"poll_int": 1
 }
