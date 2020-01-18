@@ -352,7 +352,7 @@ def read_imu(stdscr, logger, poll_interval):
                 # estimate velcity and position based on acceleration
                 for i in range(3):
                     imu.get().vel[i] += imu.get().accel[i] * imu.get().dt
-                    imu,get().pos[i] += imu.get().vel[i] * imu.get().dt
+                    imu.get().pos[i] += imu.get().vel[i] * imu.get().dt
 
                 imu.lock.release()
                 #logger.debug('released imu')
