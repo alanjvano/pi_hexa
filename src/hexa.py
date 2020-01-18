@@ -457,8 +457,8 @@ def update_scr(stdscr):
     stdscr.addstr('bias_accel       - {0[0]:^10.5f}  {0[1]:^10.5f}  {0[2]:^10.5f}\n'.format(imu.get().a_bias))
     stdscr.addstr('deadband_gyro    - {}\n'.format(imu.get().g_deadband))
     stdscr.addstr('deadband_accel   - {}\n'.format(imu.get().a_deadband))
-    stdscr.addstr('velocity         - {:^6.2f}\n'.format(imu.get().vel))
-    stdscr.addstr('position         - {:^6.2f}\n'.format(imu.get().pos))
+    stdscr.addstr('velocity         - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().vel))
+    stdscr.addstr('position         - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().pos))
     stdscr.addstr('time - {}\n'.format(imu.get().time_cur))
     stdscr.addstr('dt - {:^10.10f}\n'.format(imu.get().dt))
     stdscr.addstr('X: {}  O: {}  Tri: {}  Sqr: {}\n'.format(control.get().state['x'],
