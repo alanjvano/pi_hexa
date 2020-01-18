@@ -24,6 +24,7 @@ global control
 global imu
 global conf
 global motors
+global hexa
 
 # argument parser
 parser = argparse.ArgumentParser(description="hexa")
@@ -111,7 +112,7 @@ class Controller:
             'l_trig_a': 0.0,
             'r_trig_a': 0.0
         }
-        self.throttle = 0.0
+        #self.throttle = 0.0
 
 class IMU:
     def __init__(self):
@@ -135,6 +136,26 @@ class IMU:
         self.calibrated = False
         self.stale = False
         self.dt = 0.0 # converted to seconds
+
+class Hexacopter:
+    global motors
+    def __init__(self):
+        self.throttle = 0.0
+        self.mode = 'unarmed'  # initialize into unarmed state
+        self.kit = ServoKit(channels=16)
+
+    def arm(self):
+        # arm motors
+        for i in motors:
+            self.kit.servo[i] = 180
+        time.sleep(0.2)
+        for i in motors:
+            self.kit.servo[i] = 0
+
+    def unarm(self):
+        # unarm motors
+        for i in motors:
+            self.kit.servo[i] = 0
 
 def init_controller(stdscr, logger):
 
@@ -174,6 +195,10 @@ def init_controller(stdscr, logger):
 def read_controller(dev,logger):
     logger.debug('starting')
     global control
+    global hexa
+    global conf
+
+    enable_motors = conf['enable_motors']
 
     ps3_codes = {
         304: 'x',
@@ -205,6 +230,7 @@ def read_controller(dev,logger):
         try:
             for event in dev.read_loop():
                 control.lock.acquire()
+                hexa.lock.acquire()
                 #logger.debug('acquired control')
 
                 # handle button presses
@@ -217,12 +243,24 @@ def read_controller(dev,logger):
                     control.get().state[ps3_codes[event.code]] = event.value
 
                 # update inputs
-                if control.get().l_trig_d:
-                    control.get().throttle -= 0.1 * control.get().l_trig_a
-                if control.get().r_trig_d:
-                    control.get().throttle += 0.1 * control.get().r_trig_a
+                #if control.get().l_trig_d:
+                hexa.get().throttle -= 0.1 * control.get().l_trig_a
+                #if control.get().r_trig_d:
+                hexa.get().throttle += 0.1 * control.get().r_trig_a
+
+                if enable_motors:
+                    if control.get().l_bump and control.get().r_bump:
+                        if hexa.get().mode = 'unarmed':
+                            hexa.get().mode = 'armed'
+                            hexa.get().arm()
+                            logger.info('armed motors')
+                        elif hexa.get().mode = 'armed':
+                            hexa.get().mode = 'unarmed'
+                            hexa.get().unarm()
+                            logger.info('unarmed motors')
 
                 control.lock.release()
+                hexa.lock.release()
                 #logger.debug('released control')
 
         # in case the controller goes to asleep or disconnects try to reconnect
@@ -439,6 +477,9 @@ def update_scr(stdscr, logger):
     logger.debug('starting')
     global imu
     global control
+    global conf
+    global hexa
+    sleep_time = conf['display_sleep']
     while True:
         stdscr.erase()
         imu.lock.acquire()
@@ -467,14 +508,16 @@ def update_scr(stdscr, logger):
             control.get().state['right'], control.get().state['up'], control.get().state['down']))
         stdscr.addstr('l_trig: {:^6}   r_trig: {:^6}\n'.format(control.get().state['l_trig_a'], control.get().state['r_trig_a']))
         stdscr.addstr('imu stale: {}\n'.format(imu.get().stale))
-        stdscr.addstr('throttle: {}\n'.format(control.get().throttle))
+        stdscr.addstr('throttle: {}\n'.format(hexa.get().throttle))
+        stdscr.addstr('hexacopter mode: {}'.format(hexa.get().mode))
 
 
         imu.lock.release()
         control.lock.release()
+        hexa.lock.release()
         #logger.debug('released imu and control')
         stdscr.refresh()
-        time.sleep(0.1)
+        time.sleep(sleep_time)
 
 def complementary_filter(logger):
     global imu
@@ -512,6 +555,7 @@ def main(stdscr):
     global control
     global imu
     global conf
+    global hexa
 
     # set up terminal output
     curses.use_default_colors()
@@ -524,6 +568,7 @@ def main(stdscr):
     ps3 = init_controller(stdscr, logger)
     control = Spin_lock(Controller())
     imu = Spin_lock(IMU())
+    hexa = Spin_lock(Hexacopter())
 
     # initialize threads
     try:

@@ -5,5 +5,7 @@
 	"accel_low_pass_filter": 0.9,
 	"num_cal": 50,
 	"deadband_range": 1.0,
-	"poll_int": 1
+	"poll_int": 1,
+	"display_sleep": 0.2,
+	"enable_motors": true
 }
