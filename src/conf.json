@@ -1,11 +1,20 @@
 {
 	"motors":	[0,1,2,8,14,15],
+	"controller_mac": "05:F4:7E:BE:63:25"
 	"gyro_sensitivity": 0.99,
 	"accel_filter_num": 11,
 	"accel_low_pass_filter": 0.9,
 	"num_cal": 50,
 	"deadband_range": 1.0,
 	"poll_int": 1,
-	"display_sleep": 0.2,
-	"enable_motors": true
+	"display_sleep": 0.1,
+	"hexa_update_sleep": 0.05,
+	"enable_motors": true,
+	"throttle_responsiveness": 0.0000001,
+	"throttle_ramp": 1.8,
+	"max_angle": 20,
+	"yaw_sensitivity": 0.0000001,
+	"max_throttle": 0.8,
+	"pid_angle": [0.0,0.0,0.0],
+	"pid_angluar_velocity": [0.0,0.0,0.0]
 }

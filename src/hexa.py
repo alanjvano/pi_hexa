@@ -18,6 +18,8 @@ import digitalio
 import adafruit_tlc59711
 from adafruit_servokit import ServoKit
 import logging
+import signal
+import subprocess
 
 # init global variables
 global control
@@ -25,6 +27,8 @@ global imu
 global conf
 global motors
 global hexa
+global current_event
+current_event = None
 
 # argument parser
 parser = argparse.ArgumentParser(description="hexa")
@@ -42,6 +46,16 @@ motors = conf['motors']
 
 # set up line pointer for curses interface
 #global curses_line 0
+
+# deal with external interrupts
+def interrupt_handler(sig, frame):
+    curses.nocbreak()
+    curses.echo()
+    curses.endwin()
+    print('interrupt detected (ctrl-c)')
+    sys.exit()
+
+signal_handler = signal.getsignal(signal.SIGSTOP)
 
 # initialize handler for logging to file
 def init_logging():
@@ -86,6 +100,8 @@ class Spin_lock:
         return self.resource
 
 class Controller:
+    global conf
+
     def __init__(self):
         self.state = {
             'x': False,
@@ -105,13 +121,16 @@ class Controller:
             'r_joy': False,
             'l_trig_d': False,
             'r_trig_d': False,
-            'left_x': 0.0,
-            'left_y': 0.0,
-            'right_x': 0.0,
-            'right_y': 0.0,
+            'left_x': 127.0,
+            'left_y': 127.0,
+            'right_x': 127.0,
+            'right_y': 127.0,
             'l_trig_a': 0.0,
             'r_trig_a': 0.0
         }
+        self.cur_event = None
+        self.mac = conf['controller_mac']
+        self.status = 'disconnected'
         #self.throttle = 0.0
 
 class IMU:
@@ -136,13 +155,25 @@ class IMU:
         self.calibrated = False
         self.stale = False
         self.dt = 0.0 # converted to seconds
+        self.a_vel_filtered_prev = np.array([0.0,0.0,0.0])
 
 class Hexacopter:
     global motors
+    global conf
+
     def __init__(self):
         self.throttle = 0.0
         self.mode = 'unarmed'  # initialize into unarmed state
         self.kit = ServoKit(channels=16)
+        self.target_angle = np.array([0.0,0.0,0.0])
+        self.pid_a = conf['pid_angle']
+        self.pid_avel = conf['pid_angluar_velocity']
+        self.integral_a = np.array([0.0,0.0,0.0])
+        self.integral_avel = np.array([0.0,0.0,0.0])
+        self.err_a = np.array([0.0,0.0,0.0])
+        self.err_avel = np.array([0.0,0.0,0.0])
+        self.throttle_adjust = np.array([0.0,0.0,0.0])
+        self.pwm = np.array([0.0,0.0,0.0,0.0,0.0,0.0])
 
     def arm(self):
         # arm motors
@@ -157,7 +188,25 @@ class Hexacopter:
         for i in motors:
             self.kit.servo[i] = 0
 
+    def throttle_adjust(self):
+        self.pwm[0] = self.throttle - 0.5*self.throttle_adjust[0] - self.throttle_adjust[1] + self.throttle_adjust[2]
+        self.pwm[1] = self.throttle - self.throttle_adjust[0] - self.throttle_adjust[2]
+        self.pwm[2] = self.throttle - 0.5*self.throttle_adjust[0] + self.throttle_ajdust[1] + self.throttle_adjust[2]
+        self.pwm[3] = self.throttle + 0.5*self.throttle_adjust[0] + self.throttle_adjust[1] - self.throttle_adjust[2]
+        self.pwm[4] = self.throttle + self.throttle_adjust[0] + self.throttle_adjust[2]
+        self.pwm[5] = self.throttle + 0.5*self.throttle_adjust[0] - self.throttle_adjust[1] - self.throttle_adjust[2]
+        for each in self.pwm:
+            if each > 180:
+                each = 180
+            elif each < 0:
+                each = 0
+
+        if self.mode == 'armed':
+            for i in range(6):
+                self.kit.servo[i] = self.pwm[i]
+
 def init_controller(stdscr, logger):
+    global control
 
     stdscr.addstr(1,0,"initializing controller...\n")
     stdscr.refresh()
@@ -197,8 +246,10 @@ def read_controller(dev,logger):
     global control
     global hexa
     global conf
+    global current_event
 
     enable_motors = conf['enable_motors']
+    mac_address = conf['controller_mac']
 
     ps3_codes = {
         304: 'x',
@@ -229,53 +280,122 @@ def read_controller(dev,logger):
     while True:
         try:
             for event in dev.read_loop():
-                control.lock.acquire()
-                hexa.lock.acquire()
-                #logger.debug('acquired control')
+                if (event.type != 4) and (event.type != 0):
+                    #current_event = evdev.categorize(event)
+                    control.lock.acquire()
+                    try:
+                        control.get().cur_event = event
+                    finally:
+                        control.lock.release()
 
-                # handle button presses
+                # handle digital inputs
                 if event.type == 1:
-                    if event.code != 0 and event.code != 4:
+                    control.lock.acquire()
+                    #control.get().cur_event = evdev.categorize(event)
+                    try:
                         control.get().state[ps3_codes[event.code]] = bool(event.value)
+                    finally:
+                        control.lock.release()
 
                 # handle analog inputs
                 if event.type == 3:
-                    control.get().state[ps3_codes[event.code]] = event.value
+                    control.lock.acquire()
+                    try:
+                        control.get().state[ps3_codes[event.code]] = event.value
+                    finally:
+                        control.lock.release()
 
-                # update inputs
-                #if control.get().l_trig_d:
-                hexa.get().throttle -= 0.1 * control.get().l_trig_a
-                #if control.get().r_trig_d:
-                hexa.get().throttle += 0.1 * control.get().r_trig_a
+                    # adjust throttle
+                    # #if event.code == 2:
+                    #     hexa.lock.acquire()
+                    #     try:
+                    #         hexa.get().throttle -= 0.1 * event.value
+                    #     finally:
+                    #         hexa.lock.release()
+                    # elif event.code == 5:
+                    #     hexa.lock.acquire()
+                    #     try:
+                    #         hexa.get().throttle += 0.1 * event.value
+                    #     finally:
+                    #         hexa.lock.release()
 
-                if enable_motors:
-                    if control.get().l_bump and control.get().r_bump:
-                        if hexa.get().mode == 'unarmed':
-                            hexa.get().mode = 'armed'
-                            hexa.get().arm()
-                            logger.info('armed motors')
-                        elif hexa.get().mode == 'armed':
-                            hexa.get().mode = 'unarmed'
-                            hexa.get().unarm()
-                            logger.info('unarmed motors')
 
-                control.lock.release()
-                hexa.lock.release()
-                #logger.debug('released control')
+                # if enable_motors:
+                #     control.lock.acquire()
+                #     if control.get().l_bump and control.get().r_bump:
+                #         control.lock.release()
+                #         hexa.lock.acquire()
+                #         if hexa.get().mode == 'unarmed':
+                #             hexa.get().mode = 'armed'
+                #             hexa.get().arm()
+                #             logger.info('armed motors')
+                #         elif hexa.get().mode == 'armed':
+                #             hexa.get().mode = 'unarmed'
+                #             hexa.get().unarm()
+                #             logger.info('unarmed motors')
+                #         hexa.lock.release()
+                #     if control.lock.locked():
+                #         control.lock.release()
 
         # in case the controller goes to asleep or disconnects try to reconnect
         except:
+            if control.lock.locked():
+                control.lock.release()
+            if hexa.lock.locked():
+                hexa.lock.release()
+            # check if device disconnected
+            term_data = subprocess.getoutput("hcitool con")
+            if mac_address not in term_data.split():
+                logger.info('controller disconnected')
+                conn = False
+                while not conn:
+                    devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
+                    for device in devices:
+                        if device.name == 'PLAYSTATION(R)3Conteroller-PANHAI':
+                            ps3 = device.path
+                            dev = evdev.InputDevice(ps3)
+                            logger.info('reconnected to controller: {} - {}'.format(device.name, device.path))
+                            conn = True
+
+def update_hexa(logger):
+    global control
+    global hexa
+    global conf
+    slp_int = conf['hexa_update_sleep']
+    thr_pwr = conf['throttle_responsiveness']
+    thr_rmp = conf['throttle_ramp']
+    max_angle = conf['max_angle']
+    yaw_sns = conf['yaw_sensitivity']
+    max_thr = conf['max_throttle']
+
+    logger.debug('starting')
+
+    while True:
+        control.lock.acquire()
+        hexa.lock.acquire()
+        try:
+            # adjust throttle
+            hexa.get().throttle += thr_pwr * control.get().state['r_trig_a']**thr_rmp
+            if hexa.get().throttle > 180 * max_thr:
+                hexa.get().throttle = 180 * max_thr
+            hexa.get().throttle -= thr_pwr * control.get().state['l_trig_a']**thr_rmp
+            if hexa.get().throttle < 0:
+                hexa.get().throttle = 0
+
+            # adjust target angle
+            hexa.get().target_angle[1] = mapper(-control.get().state['left_y'] + 254.5, (0, 255), (-max_angle, max_angle))
+            hexa.get().target_angle[0] = mapper(control.get().state['left_x'] + 0.5, (0, 255), (-max_angle, max_angle))
+            #hexa.get().target_angle[2] += mapper((control.get().state['right_x'] - 127) * yaw_sns, (0, 255), (-1, 1))
+
+        finally:
             control.lock.release()
-            logger.info('controller disconnected')
-            conn = False
-            while not conn:
-                devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
-                for device in devices:
-                    if device.name == 'PLAYSTATION(R)3Conteroller-PANHAI':
-                        ps3 = device.path
-                        dev = evdev.InputDevice(ps3)
-                        logger.info('reconnected to controller: {} - {}'.format(device.name, device.path))
-                        conn = True
+            hexa.lock.release()
+
+        time.sleep(slp_int)
+
+def mapper(x, a, b):
+    (a1, a2), (b1, b2) = a, b
+    return b1 + ((x - a1) * (b2 - b1) / (a2 - a1))
 
 def read_imu(stdscr, logger, poll_interval):
     global imu
@@ -328,6 +448,7 @@ def read_imu(stdscr, logger, poll_interval):
 
             imu.lock.acquire()
             #logger.debug('acquired imu')
+            #imu.get().a_vel_filtered_prev = imu.get().a_vel_filtered
             imu.get().a_vel = data['gyro']
             imu.get().angle_fus = data['fusionPose']
             imu.get().angle_fus_q = data['fusionQPose']
@@ -398,6 +519,15 @@ def read_imu(stdscr, logger, poll_interval):
             else:
                 imu.lock.release()
                 #logger.debug('released imu')
+
+            update_pid()
+
+            # update motor pwm
+            hexa.lock.acquire()
+            try:
+                hexa.get().throttle_adjust()
+            finally:
+                hexa.lock.release()
 
             time.sleep(poll_interval * 1.0/1000.0)
 
@@ -479,43 +609,68 @@ def update_scr(stdscr, logger):
     global control
     global conf
     global hexa
+    global current_event
+    logger.debug('current_event: '.format(current_event))
+
     sleep_time = conf['display_sleep']
+
+    # get initial time for display
+    imu.lock.acquire()
+    try:
+        init_time = imu.get().time_cur
+    finally:
+        imu.lock.release()
+
     while True:
         stdscr.erase()
+
         imu.lock.acquire()
+        try:
+            stdscr.addstr('gyro             - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().a_vel))
+            stdscr.addstr('gyro_filtered    - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().a_vel_filtered))
+            stdscr.addstr('accel            - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().accel))
+            stdscr.addstr('accel_filtered   - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().accel_filtered))
+            stdscr.addstr('fusion           - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(np.degrees(imu.get().angle_fus)))
+            stdscr.addstr('fusionq          - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().angle_fus_q))
+            stdscr.addstr('complementary    - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().angle_comp))
+            stdscr.addstr('angle_accel      - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().angle_accel))
+            stdscr.addstr('bias_gyro        - {0[0]:^10.5f}  {0[1]:^10.5f}  {0[2]:^10.5f}\n'.format(imu.get().g_bias))
+            stdscr.addstr('bias_accel       - {0[0]:^10.5f}  {0[1]:^10.5f}  {0[2]:^10.5f}\n'.format(imu.get().a_bias))
+            stdscr.addstr('deadband_gyro    - {}\n'.format(imu.get().g_deadband))
+            stdscr.addstr('deadband_accel   - {}\n'.format(imu.get().a_deadband))
+            stdscr.addstr('velocity         - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().vel))
+            stdscr.addstr('position         - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().pos))
+            stdscr.addstr('time - {}\n'.format(math.floor((imu.get().time_cur - init_time) / 10**6)))
+            stdscr.addstr('dt - {:^10.10f}\n'.format(imu.get().dt))
+            stdscr.addstr('imu stale: {}\n'.format(imu.get().stale))
+        finally:
+            imu.lock.release()
+
         control.lock.acquire()
+        try:
+            stdscr.addstr('latest event     - {}\n'.format(evdev.categorize(control.get().cur_event)))
+            #stdscr.addstr('latest event     - {}\n'.format(current_event))
+            stdscr.addstr('X: {}  O: {}  Tri: {}  Sqr: {}\n'.format(control.get().state['x'],
+                control.get().state['o'], control.get().state['tri'], control.get().state['sqr']))
+            stdscr.addstr('l: {}  r: {}  u: {}  d: {}\n'.format(control.get().state['left'],
+                control.get().state['right'], control.get().state['up'], control.get().state['down']))
+            stdscr.addstr('l_trig: {:^6}   r_trig: {:^6}\n'.format(control.get().state['l_trig_a'], control.get().state['r_trig_a']))
+            stdscr.addstr('joysticks: ({:^6.2f} {:^6.2f}) | ({:^6.2f} {:^6.2f})\n'.format(control.get().state['left_x'],
+                                                                control.get().state['left_y'],
+                                                                control.get().state['right_x'],
+                                                                control.get().state['right_y']))
+        finally:
+            control.lock.release()
+
         hexa.lock.acquire()
-        #logger.debug('acquired imu and control')
+        try:
+            stdscr.addstr('throttle: {}\n'.format(hexa.get().throttle))
+            stdscr.addstr('target angles: roll {0[0]:^6.2f} | pitch {0[1]:^6.2f} | yaw {0[2]:^6.2f}\n'.format(hexa.get().target_angle))
+            stdscr.addstr('hexacopter mode: {}\n'.format(hexa.get().mode))
+        finally:
+            hexa.lock.release()
 
-        stdscr.addstr('gyro             - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().a_vel))
-        stdscr.addstr('gyro_filtered    - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().a_vel_filtered))
-        stdscr.addstr('accel            - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().accel))
-        stdscr.addstr('accel_filtered   - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().accel_filtered))
-        stdscr.addstr('fusion           - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(np.degrees(imu.get().angle_fus)))
-        stdscr.addstr('fusionq          - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().angle_fus_q))
-        stdscr.addstr('complementary    - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().angle_comp))
-        stdscr.addstr('angle_accel      - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().angle_accel))
-        stdscr.addstr('bias_gyro        - {0[0]:^10.5f}  {0[1]:^10.5f}  {0[2]:^10.5f}\n'.format(imu.get().g_bias))
-        stdscr.addstr('bias_accel       - {0[0]:^10.5f}  {0[1]:^10.5f}  {0[2]:^10.5f}\n'.format(imu.get().a_bias))
-        stdscr.addstr('deadband_gyro    - {}\n'.format(imu.get().g_deadband))
-        stdscr.addstr('deadband_accel   - {}\n'.format(imu.get().a_deadband))
-        stdscr.addstr('velocity         - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().vel))
-        stdscr.addstr('position         - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().pos))
-        stdscr.addstr('time - {}\n'.format(imu.get().time_cur))
-        stdscr.addstr('dt - {:^10.10f}\n'.format(imu.get().dt))
-        stdscr.addstr('X: {}  O: {}  Tri: {}  Sqr: {}\n'.format(control.get().state['x'],
-            control.get().state['o'], control.get().state['tri'], control.get().state['sqr']))
-        stdscr.addstr('l: {}  r: {}  u: {}  d: {}\n'.format(control.get().state['left'],
-            control.get().state['right'], control.get().state['up'], control.get().state['down']))
-        stdscr.addstr('l_trig: {:^6}   r_trig: {:^6}\n'.format(control.get().state['l_trig_a'], control.get().state['r_trig_a']))
-        stdscr.addstr('imu stale: {}\n'.format(imu.get().stale))
-        stdscr.addstr('throttle: {}\n'.format(hexa.get().throttle))
-        stdscr.addstr('hexacopter mode: {}'.format(hexa.get().mode))
-
-
-        imu.lock.release()
-        control.lock.release()
-        hexa.lock.release()
+        #stdscr.addstr('print time: {}'.format(now_time - time.time()))
         #logger.debug('released imu and control')
         stdscr.refresh()
         time.sleep(sleep_time)
@@ -552,6 +707,36 @@ def complementary_filter(logger):
     imu.lock.release()
     #logger.debug('released imu (comp filter)')
 
+def update_pid():
+    global hexa
+    global imu
+
+    # implement cascade pid controller
+    hexa.lock.acquire()
+    imu.lock.acquire()
+    try:
+        dt = imu.get().dt
+        for i in range(3):
+            # first pid control uses angle
+            err_a = hexa.get().target_angle - imu.get().fusion[i]
+            proportional = hexa.get().pid_a[0] * err_a
+            hexa.get().integral_a += hexa.get().pid_a[1] * err_a * dt
+            derivative = hexa.get().pid_a[2] * imu.get().a_vel_filtered[i] / dt
+            u1 = proportional + hexa.get().integral_a + derivative
+
+            # second pid control uses angular velocity
+            err_avel = u1 - imu.get().a_vel_filtered
+            propotional = hexa.get().pid_avel[0] * err_avel
+            hexa.get().integral_avel += hexa.get().pid_avel[1] * err_avel * dt
+            derivative = hexa.get().pid_avel[2] * imu.get().accel_filtered[i] / dt
+            hexa.get().throttle_adjust[i] = proportional + hexa.get().integral_avel + derivative
+    finally:
+        hexa.lock.release()
+        imu.lock.release()
+
+
+
+
 def main(stdscr):
     global control
     global imu
@@ -575,10 +760,12 @@ def main(stdscr):
     try:
         control_t = Thread(name='contr_thread', target=read_controller, args=(ps3,logger,))
         imu_t = Thread(name='imu_thread', target=read_imu, args=(stdscr,logger, conf['poll_int']))
+        hexa_t = Thread(name='hexa_thread', target=update_hexa, args=(logger,))
         #control_t.setDaemon(true)
         #imu_t.setDaemon(true)
         control_t.start()
         imu_t.start()
+        hexa_t.start()
     except:
         logger.debug('threads failed to start')
 
@@ -601,7 +788,9 @@ def main(stdscr):
     rgb[3] = (0, 16000, 16000)
 
     while True:
-        pass
+        # watch for interrupt signals
+        signal.signal(signal.SIGINT, interrupt_handler)
+        #signal.signal(signal.SIGTSTP, signal_handler)
 
 if __name__ == "__main__":
-    curses.wrapper(main)
+        curses.wrapper(main)
