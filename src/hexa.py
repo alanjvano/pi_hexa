@@ -4,7 +4,6 @@ import RTIMU
 import os.path
 import time
 import math
-import copy
 import json
 import argparse
 import numpy as np
@@ -20,6 +19,8 @@ from adafruit_servokit import ServoKit
 import logging
 import signal
 import subprocess
+from adafruit_pca9685 import PCA9685
+from adafruit_motor import servo
 
 # init global variables
 global control
@@ -160,11 +161,12 @@ class IMU:
 class Hexacopter:
     global motors
     global conf
+    motors = conf['motors']
 
     def __init__(self):
         self.throttle = 0.0
         self.mode = 'unarmed'  # initialize into unarmed state
-        self.kit = ServoKit(channels=16)
+        #self.kit = ServoKit(channels=16)
         self.target_angle = np.array([0.0,0.0,0.0])
         self.pid_a = conf['pid_angle']
         self.pid_avel = conf['pid_angluar_velocity']
@@ -174,36 +176,42 @@ class Hexacopter:
         self.err_avel = np.array([0.0,0.0,0.0])
         self.throttle_adjust = np.array([0.0,0.0,0.0])
         self.pwm = np.array([0.0,0.0,0.0,0.0,0.0,0.0])
+        self.arm_time = 0.0
+        self.servos = [None]*6
 
     def arm(self):
+        # initialize motors
+        i2c = busio.I2C(board.SCL, board.SDA)
+        pca = PCA9685(i2c)
+        pca.frequency = 50
+        for i in range(6):
+            self.servos[i] = servo.Servo(pca.channels[motors[i]], actuation_range=180, min_pulse=1000, max_pulse=2000)
+
         # arm motors
-        for i in motors:
-            self.kit.servo[i] = 180
-        time.sleep(0.2)
-        for i in motors:
-            self.kit.servo[i] = 0
+        for i in range(6):
+            self.servos[i].angle = 0
+        time.sleep(0.4)
 
     def unarm(self):
-        # unarm motors
-        for i in motors:
-            self.kit.servo[i] = 0
+        pass
 
-    def throttle_adjust(self):
-        self.pwm[0] = self.throttle - 0.5*self.throttle_adjust[0] - self.throttle_adjust[1] + self.throttle_adjust[2]
-        self.pwm[1] = self.throttle - self.throttle_adjust[0] - self.throttle_adjust[2]
-        self.pwm[2] = self.throttle - 0.5*self.throttle_adjust[0] + self.throttle_ajdust[1] + self.throttle_adjust[2]
-        self.pwm[3] = self.throttle + 0.5*self.throttle_adjust[0] + self.throttle_adjust[1] - self.throttle_adjust[2]
-        self.pwm[4] = self.throttle + self.throttle_adjust[0] + self.throttle_adjust[2]
-        self.pwm[5] = self.throttle + 0.5*self.throttle_adjust[0] - self.throttle_adjust[1] - self.throttle_adjust[2]
-        for each in self.pwm:
-            if each > 180:
-                each = 180
-            elif each < 0:
-                each = 0
+    def throttle_update(self):
+        self.pwm[0] = self.throttle - 0.5*self.throttle_adjust[0] - self.throttle_adjust[1] #+ self.throttle_adjust[2]
+        self.pwm[1] = self.throttle - self.throttle_adjust[0] #- self.throttle_adjust[2]
+        self.pwm[2] = self.throttle - 0.5*self.throttle_adjust[0] + self.throttle_adjust[1] #+ self.throttle_adjust[2]
+        self.pwm[3] = self.throttle + 0.5*self.throttle_adjust[0] + self.throttle_adjust[1] #- self.throttle_adjust[2]
+        self.pwm[4] = self.throttle + self.throttle_adjust[0] #+ self.throttle_adjust[2]
+        self.pwm[5] = self.throttle + 0.5*self.throttle_adjust[0] - self.throttle_adjust[1] #- self.throttle_adjust[2]
+        for i in range(6):
+            if self.pwm[i] > 180.0:
+                self.pwm[i] = 180.0
+            elif self.pwm[i] < 0.0:
+                self.pwm[i] = 0.0
 
+        # if armed, set motors
         if self.mode == 'armed':
             for i in range(6):
-                self.kit.servo[i] = self.pwm[i]
+                self.servos[i].angle = self.pwm[i]
 
 def init_controller(stdscr, logger):
     global control
@@ -277,6 +285,13 @@ def read_controller(dev,logger):
         5: 'r_trig_a'
     }
 
+    # set as connected
+    control.lock.acquire()
+    try:
+        control.get().status = 'connected'
+    finally:
+        control.lock.release()
+
     while True:
         try:
             for event in dev.read_loop():
@@ -305,38 +320,6 @@ def read_controller(dev,logger):
                     finally:
                         control.lock.release()
 
-                    # adjust throttle
-                    # #if event.code == 2:
-                    #     hexa.lock.acquire()
-                    #     try:
-                    #         hexa.get().throttle -= 0.1 * event.value
-                    #     finally:
-                    #         hexa.lock.release()
-                    # elif event.code == 5:
-                    #     hexa.lock.acquire()
-                    #     try:
-                    #         hexa.get().throttle += 0.1 * event.value
-                    #     finally:
-                    #         hexa.lock.release()
-
-
-                # if enable_motors:
-                #     control.lock.acquire()
-                #     if control.get().l_bump and control.get().r_bump:
-                #         control.lock.release()
-                #         hexa.lock.acquire()
-                #         if hexa.get().mode == 'unarmed':
-                #             hexa.get().mode = 'armed'
-                #             hexa.get().arm()
-                #             logger.info('armed motors')
-                #         elif hexa.get().mode == 'armed':
-                #             hexa.get().mode = 'unarmed'
-                #             hexa.get().unarm()
-                #             logger.info('unarmed motors')
-                #         hexa.lock.release()
-                #     if control.lock.locked():
-                #         control.lock.release()
-
         # in case the controller goes to asleep or disconnects try to reconnect
         except:
             if control.lock.locked():
@@ -348,6 +331,11 @@ def read_controller(dev,logger):
             if mac_address not in term_data.split():
                 logger.info('controller disconnected')
                 conn = False
+                control.lock.acquire()
+                try:
+                    control.get().status = 'disconnected'
+                finally:
+                    control.lock.release()
                 while not conn:
                     devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
                     for device in devices:
@@ -355,6 +343,11 @@ def read_controller(dev,logger):
                             ps3 = device.path
                             dev = evdev.InputDevice(ps3)
                             logger.info('reconnected to controller: {} - {}'.format(device.name, device.path))
+                            control.lock.acquire()
+                            try:
+                                control.get().status = 'connected'
+                            finally:
+                                control.lock.release()
                             conn = True
 
 def update_hexa(logger):
@@ -367,6 +360,7 @@ def update_hexa(logger):
     max_angle = conf['max_angle']
     yaw_sns = conf['yaw_sensitivity']
     max_thr = conf['max_throttle']
+    arm_time = conf['arm_time']
 
     logger.debug('starting')
 
@@ -386,6 +380,21 @@ def update_hexa(logger):
             hexa.get().target_angle[1] = mapper(-control.get().state['left_y'] + 254.5, (0, 255), (-max_angle, max_angle))
             hexa.get().target_angle[0] = mapper(control.get().state['left_x'] + 0.5, (0, 255), (-max_angle, max_angle))
             #hexa.get().target_angle[2] += mapper((control.get().state['right_x'] - 127) * yaw_sns, (0, 255), (-1, 1))
+
+            # arm hexacopter
+            #logger.debug('checking mode: {}'.format(hexa.get().mode))
+            #logger.debug('{} {}'.format(control.get().state['l_joy'], control.get().state['r_joy']))
+            if hexa.get().mode == 'unarmed':
+                if control.get().state['l_bump'] and control.get().state['r_bump']:
+                    hexa.get().mode = 'arming'
+                    hexa.get().arm_time = time.time()
+
+            if hexa.get().mode == 'arming':
+                if (time.time() - hexa.get().arm_time) >= arm_time:
+                    hexa.get().mode = 'armed'
+                    hexa.get().arm()
+                elif (not bool(control.get().state['l_bump'])) or (not bool(control.get().state['r_bump'])):
+                    hexa.get().mode = 'unarmed'
 
         finally:
             control.lock.release()
@@ -525,11 +534,11 @@ def read_imu(stdscr, logger, poll_interval):
             # update motor pwm
             hexa.lock.acquire()
             try:
-                hexa.get().throttle_adjust()
+                hexa.get().throttle_update()
             finally:
                 hexa.lock.release()
 
-            time.sleep(poll_interval * 1.0/1000.0)
+            #time.sleep(poll_interval * 1.0/1000.0)
 
 def calibrate_imu(stdscr, num_cal, logger, poll_interval):
     global imu
@@ -613,6 +622,8 @@ def update_scr(stdscr, logger):
     logger.debug('current_event: '.format(current_event))
 
     sleep_time = conf['display_sleep']
+    pid_const_a = conf['pid_angle']
+    pid_const_avel = conf['pid_angluar_velocity']
 
     # get initial time for display
     imu.lock.acquire()
@@ -641,13 +652,14 @@ def update_scr(stdscr, logger):
             stdscr.addstr('velocity         - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().vel))
             stdscr.addstr('position         - {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f}\n'.format(imu.get().pos))
             stdscr.addstr('time - {}\n'.format(math.floor((imu.get().time_cur - init_time) / 10**6)))
-            stdscr.addstr('dt - {:^10.10f}\n'.format(imu.get().dt))
+            stdscr.addstr('freg - {:^6.2f}\n'.format(1/imu.get().dt))
             stdscr.addstr('imu stale: {}\n'.format(imu.get().stale))
         finally:
             imu.lock.release()
 
         control.lock.acquire()
         try:
+            stdscr.addstr('contr status     - {}\n'.format(control.get().status))
             stdscr.addstr('latest event     - {}\n'.format(evdev.categorize(control.get().cur_event)))
             #stdscr.addstr('latest event     - {}\n'.format(current_event))
             stdscr.addstr('X: {}  O: {}  Tri: {}  Sqr: {}\n'.format(control.get().state['x'],
@@ -659,14 +671,19 @@ def update_scr(stdscr, logger):
                                                                 control.get().state['left_y'],
                                                                 control.get().state['right_x'],
                                                                 control.get().state['right_y']))
+            stdscr.addstr('l_bump: {:^6}   r_bump: {:^6}\n'.format(control.get().state['l_bump'], control.get().state['r_bump']))
         finally:
             control.lock.release()
 
         hexa.lock.acquire()
         try:
-            stdscr.addstr('throttle: {}\n'.format(hexa.get().throttle))
-            stdscr.addstr('target angles: roll {0[0]:^6.2f} | pitch {0[1]:^6.2f} | yaw {0[2]:^6.2f}\n'.format(hexa.get().target_angle))
             stdscr.addstr('hexacopter mode: {}\n'.format(hexa.get().mode))
+            stdscr.addstr('throttle: {:^6.2f}\n'.format(hexa.get().throttle))
+            stdscr.addstr('target angles: roll {0[0]:^6.2f} | pitch {0[1]:^6.2f} | yaw {0[2]:^6.2f}\n'.format(hexa.get().target_angle))
+            stdscr.addstr('error (angle): {0[0]:^6.3f}  {0[1]:^6.3f}  {0[2]:^6.3f}\n'.format(hexa.get().err_a))
+            stdscr.addstr('error (a-vel): {0[0]:^6.3f}  {0[1]:^6.3f}  {0[2]:^6.3f}\n'.format(hexa.get().err_avel))
+            stdscr.addstr('throttle adjust: {0[0]:^6.3f}  {0[1]:^6.3f}  {0[2]:^6.3f}\n'.format(hexa.get().throttle_adjust))
+            stdscr.addstr('pwm: {0[0]:^6.2f}  {0[1]:^6.2f}  {0[2]:^6.2f} {0[3]:^6.2f}  {0[4]:^6.2f}  {0[5]:^6.2f}\n'.format(hexa.get().pwm))
         finally:
             hexa.lock.release()
 
@@ -718,24 +735,24 @@ def update_pid():
         dt = imu.get().dt
         for i in range(3):
             # first pid control uses angle
-            err_a = hexa.get().target_angle - imu.get().fusion[i]
+            err_a = hexa.get().target_angle[i] - np.degrees(imu.get().angle_fus[i])
             proportional = hexa.get().pid_a[0] * err_a
-            hexa.get().integral_a += hexa.get().pid_a[1] * err_a * dt
-            derivative = hexa.get().pid_a[2] * imu.get().a_vel_filtered[i] / dt
-            u1 = proportional + hexa.get().integral_a + derivative
+            hexa.get().integral_a[i] += hexa.get().pid_a[1] * err_a * dt
+            derivative = hexa.get().pid_a[2] * imu.get().a_vel_filtered[i]
+            u1 = proportional + hexa.get().integral_a[i] + derivative
 
             # second pid control uses angular velocity
-            err_avel = u1 - imu.get().a_vel_filtered
+            err_avel = u1 - imu.get().a_vel_filtered[i]
             propotional = hexa.get().pid_avel[0] * err_avel
-            hexa.get().integral_avel += hexa.get().pid_avel[1] * err_avel * dt
-            derivative = hexa.get().pid_avel[2] * imu.get().accel_filtered[i] / dt
-            hexa.get().throttle_adjust[i] = proportional + hexa.get().integral_avel + derivative
+            hexa.get().integral_avel[i] += hexa.get().pid_avel[1] * err_avel * dt
+            derivative = hexa.get().pid_avel[2] * imu.get().accel_filtered[i]
+            hexa.get().throttle_adjust[i] = proportional + hexa.get().integral_avel[i] + derivative
+
+            hexa.get().err_a[i] = err_a
+            hexa.get().err_avel[i] = err_avel
     finally:
         hexa.lock.release()
         imu.lock.release()
-
-
-
 
 def main(stdscr):
     global control
@@ -793,4 +810,4 @@ def main(stdscr):
         #signal.signal(signal.SIGTSTP, signal_handler)
 
 if __name__ == "__main__":
-        curses.wrapper(main)
+    curses.wrapper(main)
